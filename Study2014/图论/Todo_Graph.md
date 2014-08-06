@@ -1,0 +1,881 @@
+##  Graph Template
+
+******  
+### **Contents** 
+
+1.  **生成树**   
+2.  *最短路*  
+3.  **欧拉回路**  
+4.  **哈密尔顿回路**  
+5.  **RMQ**  
+6.  *最小环&最大环*  
+7.  *拓扑排序*  
+8.  **LCA**  
+9.  **连通性**  
+10. **2 SAT**  
+11. **匹配问题**  
+12. **最大流**  
+13. **费用流**  
+14. **全局最小割**  
+15. **网络流拓展**  
+16. **并查集**  
+17. *最小树形图(有向图的最小生成树)*  
+18. **树的同构**  
+19. **差分约束**  
+20. **分数规划**  
+21. **偏序集** 
+22. **最大团**  
+23. **斯坦纳树**  
+24. **图的hash**  
+25. **弦图完美消除序列**  
+26. **Other**  
+27. **待解决的问题**
+
+----------------------------------------------------------
+
+####    01. **生成树**  
+
+*	Prim  
+
+*	Kruskal  
+
+*	次小生成树  
+
+*   度限制最小生成树  
+
+
+*   动态最小生成树  
+
+
+####    02.	*最短路*  
+
+*	floyd  
+
+*	dijkstra  
+
+*	spfa  
+
+	普通入队列方式可以被cha  
+
+	deque判当前节点和队首节点可以被三角形数据cha  
+
+	priority_queue优化(本质dijkstra靠谱!)
+
+*	K短路  
+
+	练手: POJ2449 UVA10740
+		最短路+A*
+		f[x] = g[x] + h[x]
+		其中h[x]以从t到x的最短路
+		g[x]为从s到x的当前路径长度
+
+*	求字典序最小的路径
+
+	无重复标号(如给定边长度, 输出最短路径上经过的结点的最小字典序):hdu1385
+
+	有重复标号(如边长度都为d, 每条边给定标号, 输出最短路径上边标号的最小字典序)
+
+	有重复标号(如给定边长度和边标号, 输出最短路径上每条边给定的标号的最小字典序)???
+
+####    03. **欧拉回路**
+
+*	判断无向图欧拉路和欧拉回路的条件
+
+
+*   判断有向图欧拉路和欧拉回路的条件
+
+
+*   注意图的连通性的影响
+
+
+*   fleury算法(和一般dfs的差别???)
+
+
+*   磁鼓欧拉回路(HDU 2894)
+    
+            n个触头, 建图以(1<<(n-1))个结点, 建1<<n条有向边, 从最大结点出发跑欧拉回路
+            
+
+*   混合欧拉路欧拉回路的判断-->网络流模型
+
+        (相关题目：pku1637，zju1992，hdu3472, hdu1956)
+    
+            给出一张混合图（有有向边，也有无向边），判断是否存在欧拉回路。  
+            首先是对图中的无向边随意定一个方向，然后统计每个点的入度（indeg）和出度（outdeg），如果（indeg - outdeg）是奇数的话，一定不存在欧拉回路；  
+            如果所有点的入度和出度之差都是偶数，那么就开始网络流构图：  
+            1，对于有向边，舍弃；对于无向边，就按照最开始指定的方向建权值为 1 的边；  
+            2，对于入度小于出度的点，从源点连一条到它的边，权值为（outdeg - indeg）/2；出度小于入度的点，连一条它到汇点的权值为（indeg - outdeg）/2 的边；  
+            构图完成，如果满流（求出的最大流值 == 和汇点所有连边的权值之和），那么存在欧拉回路，否则不存在。  
+
+    
+
+####    04.	**哈密尔顿回路**
+
+*	
+	
+
+####    05.  **RMQ**  
+
+
+
+
+####    06.  *最小环&最大环* 
+
+*	最小环  
+
+	验题: POJ1734 
+			    
+		//floyd算法
+		//g[][] 边
+		//f[][] 最短路
+		//pre[][] 记录路径
+		int MinCircle() {
+		    int i, j, k, p;
+		    int mc = MOD;
+		    for(i = 1; i <= n; ++i) {
+		        for(j = 1; j <= n; ++j) {
+		            f[i][j] = g[i][j];
+		            if(g[i][j] < MOD && i != j) {
+		                pre[i][j] = j; //记录初始长度为1的路径
+		            }
+		            else {
+		                pre[i][j] = -1;
+		            }
+		        }
+		    }
+		    for(k = 1; k <= n; ++k) {
+		        for(i = 1; i < k ; ++i) {
+		            for(j = i + 1; j < k; ++j) {
+		                int tp = g[k][i] + f[i][j] + g[j][k];
+		                if(tp < mc) { //更新最小环和路径
+		                    mc = tp;
+		                    for(p = i, len = 0; p != -1; p = pre[p][j], len++) {
+		                        path[len] = p;
+		                    }
+		                    path[len++] = k;
+		                }
+		            } 
+		        }
+		        for(i = 1; i <= n; ++i) { //普通floyd过程
+		            for(j = 1; j <= n; ++j) {
+		                if(f[i][j] > f[i][k] + f[k][j]) {
+		                    f[i][j] = f[i][k] + f[k][j];
+		                    pre[i][j] = pre[i][k];
+		                }
+		            }
+		        }
+		    }
+		    return mc;
+		}
+
+	未验题:
+
+		//http://www.cnblogs.com/Yz81128/archive/2012/08/15/2640940.html
+		//dijkstra
+		//求一条边的两段的结点之间最短路(不包含这条边)和这条边之和
+		//O(m*m*logn)
+
+
+*	 最大环(??? 可做)
+
+		poj2240
+		//这一题, 货币兑换, 看看是否存在能使自己增值的方案, 感官上并不能算最大环问题, 而更贴切的看法是转换为最长路, 由BellmanFord思想判断存在>1的环的问题, 不过可以通过floyd的**松弛操作**同样解决掉 
+
+####    07.  *拓扑排序*  
+
+		一、拓扑排序
+		        什么是拓扑排序？简单地说，由某个集合上的一个偏序得到该集合上的一个全序，这个操作称之为拓扑排序。
+		        AVO网（Activity On Vertex Network），也称作顶点表示活动的网，就是用顶点表示活动，用弧表示活动间的优先关系的有向图。
+		        拓扑排序是对AOV网构造一个线性序列，使所有的优先关系在此序列中得以体现，换句话说，就是在AVO网中，若Vi是Vj的前驱，那么在拓扑序列中，Vi必须排在Vj之前。
+		              
+		        拓扑排序的步骤如下：
+		                1、在有向图中选取一个没有前驱的顶点，并输出；
+		                2、从图中删除该顶点和所有以它为尾的弧；
+		                3、重复1和2，直到全部顶点均被输出为止。
+		                （注：弧尾指弧的起始点，弧头是指弧的终点）
+		        一个有向无环图的拓扑序列是不唯一的。
+		              
+		二、关键路径
+		        与AVO网相对应的是AOE网（Activity On Edge）即边表示活动的网。
+		        所谓AOE网，也称作“用表示活动的网”，就是用顶点表示事件，用弧表示活动，弧上的权值表示该活动的持续时间的有向图。
+		        关键路径：是指AOE网上，完成工程的最短时间是从开始点到完成点的最长路径长度，路径长度最长的路径叫做关键路径。
+		        分析关键路径的目的是辨别哪些是关键活动，以便争取提高关键活动的工效，缩短整个工期。
+		        事件Vi的最早发生时间Ve(i)中从顶点V到Vi的最长路径长度。
+		        活动Ai的最迟开始时间V(i)是该活动的终点所表示的事件最迟发生时间与该活动的所需时间之差。
+		        一个活动的最迟开始时间减去最早开始时间之差定义为完成该活动的时间余量，而最迟开始时间等于最早开始时间的活动叫做关键活动。
+		              
+		        求关键路径的算法描述：
+		                (1) 输入e条弧<j,k>，建立AOE网的存储结构。
+		                (2) 从源点v1出发，令ve(1)=0,求 ve(j) 2<=j<=n。
+		                (3) 从汇点vn出发，令vl(n)=ve(n),求 vl(i) 1<=i<=n-1。
+		                (4) 根据各顶点的ve和vl值，求每条弧s（活动）的最早开始时间e(s)和最晚开始时间l(s)，其中e(s)=l(s)的为关键活动。
+		              
+		        求关键路径的算法分析
+		                （1） 求关键路径必须在拓扑排序的前提下进行，有环图不能求关键路径；
+		                （2） 只有缩短关键活动的工期才有可能缩短工期；
+		                （3） 若一个关键活动不在所有的关键路径上，减少它并不能减少工期；
+		                （4） 只有在不改变关键路径的前提下，缩短关键活动才能缩短整个工期。
+
+*	求任意拓扑排序或判断是否可以拓扑排序
+
+	队列实现
+
+	dfs实现  
+	记录各点完成访问的时刻(完成时间),用DFS遍历一次整个图,得出各结点的完成时间,然后按完成时间倒序排列就得到了图的拓扑序列
+
+		/* 拓扑排序         O(e)
+		 * 确保是有向无环图！
+		 * 结果逆序存放在sta中！
+		 * */
+		VI ve[Maxn];
+		bool vis[Maxn];
+		int sta[Maxn], top;
+		void dfsTopo(int u) {
+		    vis[u] = true;
+		    for (int i = 0; i < ve[u].size(); i ++ )
+		           if (!vis[ve[u][i]])
+		               dfsTopo(ve[u][i]);
+		    sta[top ++ ] = u;
+		}
+		void Toposort(int n) {
+		    memset(vis, 0, sizeof(vis));
+		    top = 0;
+		    for (int i = 1; i <= n; i ++ )
+		        if (!vis[i]) dfsTopo(i);
+		}
+
+*	字典序最小解
+
+	一般直接将队列改为优先队列即可(要求无重复标号!!!)  
+	HDU1285
+
+	区分字典序最小和标号小的尽量靠前   特殊题目要求: POJ3687
+
+	有重复标号字典序最小???
+
+*	有向图拓扑排序计数(状压dp)
+
+	验题: ZOJ1346 HDU4917
+
+		// dp[status] 当前图中结点01表示, 初始化只剩一个点dp[1<<j]=1
+		// deg[] 结点度数
+		// g[][] vector存边
+		// group[] 将当前块结点映射到group的0~now位置
+		// now当前块节点数
+		// 各个连通块求dp值, 乘上组合数C[n][now], 没处理一块n-=now
+		int doit(int status) {
+		    if(dp[status] != -1) return dp[status];
+		    LL sum = 0;
+		    int i, j, u, v;
+		    for(i = 0; i < now; i++) {
+		        u = group[i];
+		        if(deg[u] == 0) {
+		            deg[u] = -1;
+		            for(j = 0; j < g[u].SZ; j++) {
+		                v = g[u][j];
+		                deg[v]--;
+		            }
+		            sum += doit(status ^ (1<<i));
+		            for(j = 0; j < g[u].SZ; j++) {
+		                v = g[u][j];
+		                deg[v]++;
+		            }
+		            deg[u] = 0;
+		        }
+		    }
+		    return (dp[status] = sum % MOD);
+		}
+
+*	树拓扑排序计数
+
+	计算公式  
+
+		n!/node[i] (1 < i <= n) 
+		n表示树的总节点数, node[i] 表示以i为根的子树的节点数
+
+*	关键路径
+
+*	
+
+####    08.  **LCA**  
+
+
+
+
+####    09.  **连通性**  
+
+
+
+####    10. **2 SAT**  
+
+
+
+####    11. **匹配问题**  
+
+*	匈牙利 + 贪心优化
+
+		struct enode {
+		    int v, next;
+		}e[Maxm];
+		int last[Maxn], tot;
+		int n, m, match = 0;
+		int mx[Maxn], my[Maxn], dx[Maxn], dy[Maxn], dis, visit[Maxn];
+		int preHungary()
+		{
+		    int res = 0, u, v;
+		    for(int i = 0; i < n; i++)
+		    {
+		        u = i;
+		        for(int j = last[i]; -1 != j; j = e[j].next)
+		        {
+		            v = e[j].v;
+		            if(-1 == my[v])
+		            {
+		                mx[u] = v;
+		                my[v] = u;
+		                res++;
+		                break;
+		            }
+		        }
+		    }
+		    return res;
+		}
+		      
+		bool dfs(int u)
+		{
+		    int v;
+		    for(int j = last[u]; -1 != j; j = e[j].next)
+		    {
+		        v = e[j].v;
+		        if(visit[v]) continue;
+		        visit[v] = true;
+		        if(-1 == my[v] || dfs(my[v]))
+		        {
+		            my[v] = u;
+		            mx[u] = v;
+		            return true;
+		        }
+		    }
+		    return false;
+		}
+		      
+		int solve()
+		{
+		    match = 0;
+		    for(int i = 0; i < n; i++) mx[i] = -1;
+		    for(int j = n; j < n + m; j++) my[j] = -1;
+		    match += preHungary();
+		    for(int i = 1; i <= n; i++)
+		        if(-1 == mx[i])
+		        {
+		            for(int j = n; j < n + m; j++) visit[j] = false;
+		            if(dfs(i)) match++;
+		        }
+		    return match;
+		}
+
+*	HK (O(E*N^0.5))
+
+	验题: HDU 2389  spoj 4206
+
+		/*
+		 *  HK O(E*V^0.5) 最大匹配
+		 *  左半图 0~n-1
+		 *  右半图 n~n+m-1
+		 */
+		struct edgenode {
+			int v, next;
+		}e[Maxm];
+		int last[Maxn], tot;
+		int n, m, match = 0;
+		int mx[Maxn], my[Maxn], dx[Maxn], dy[Maxn], dis, visit[Maxn];
+		queue<int> Q;
+		int ux[Maxn], uy[Maxn], px[Maxn], py[Maxn], pv[Maxn];
+		
+		void adde(int u, int v) {
+		    e[tot].v = v; e[tot].next = last[u]; last[u] = tot++;
+		}
+		bool searchPath()
+		{
+		    int i, j;
+			dis = MOD;
+			for(i = 0; i < n; i++) dx[i] = -1;
+			for(j = n; j < n + m; j++) dy[j] = -1;
+			while(!Q.empty()) Q.pop();
+			for(int i = 0; i < n; i++)
+				if(-1 == mx[i]) Q.push(i);
+			int u, v;
+			while(!Q.empty())
+			{
+				u = Q.front(); Q.pop();
+				if(dx[u] > dis) break;
+				for(int j = last[u]; j != -1; j = e[j].next)
+				{
+					v = e[j].v;
+					if(-1 != dy[v]) continue;
+					dy[v] = dx[u] + 1;
+					if(-1 == my[v])
+						dis = dy[v];
+					else
+					{
+						dx[my[v]] = dy[v] + 1;
+						Q.push(my[v]);
+					}
+				}
+			}
+			return dis != MOD;
+		}
+		
+		bool dfs(int u)
+		{
+			int v;
+			for(int j = last[u]; j != -1; j = e[j].next)
+			{
+				v = e[j].v;
+				if(visit[v] || dx[u] + 1 != dy[v]) continue;
+				if(dy[v] == dis && my[v] != -1) continue;
+				visit[v] = true;
+				if(-1 == my[v] || dfs(my[v]))
+				{
+					my[v] = u;
+					mx[u] = v;
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		int solve()
+		{
+		    int i, j;
+			match = 0;
+			for(i = 0; i < n; i++) mx[i] = -1;
+			for(j = n; j < n + m; j++) my[j] = -1;
+		//	match += preHungary();
+			while(searchPath())
+			{
+				for(j = n; j < n + m; j++) visit[j] = false;
+				for(int i = 0; i < n; i++)
+					if(-1 == mx[i] && dfs(i)) match++;
+			}
+			return match;
+		}
+
+*   稳定婚姻问题
+
+*   带花树
+
+	模板题 验题: ZOJ 3316
+
+		int n, head, tail, Start, Finish;
+		int match[Maxn];    //表示哪个点匹配了哪个点
+		int father[Maxn];   //这个是增广路径的father
+		int base[Maxn];     //该点属于哪朵花
+		int Q[Maxn];
+		bool mark[Maxn], mp[Maxn][Maxn], InBlossom[Maxn], inqueue[Maxn]; //mp[][]邻接关系
+		
+		void BlossomContract(int x, int y) {
+		    memset(mark, false, sizeof(mark));
+		    memset(InBlossom, false, sizeof(InBlossom));
+		#define pre father[match[i]]
+		    int lca, i;
+		    for( i = x; i; i = pre) {
+		        i = base[i];
+		        mark[i] = true;
+		    }
+		    for(i = y; i; i = pre) {
+		        i = base[i];        //寻找lca之旅……一定要注意i=base[i]
+		        if(mark[i]) {
+		            lca = i;
+		            break;
+		        }
+		    }
+		    for(i = x; base[i] != lca; i = pre) {
+		        if(base[pre] != lca) father[pre] = match[i]; //对于BFS树中的父边是匹配边的点，
+		                                                     //father向后跳
+		        InBlossom[base[i]] = true;
+		        InBlossom[base[match[i]]] = true;
+		    }
+		    for(i = y; base[i] != lca; i = pre) {
+		        if(base[pre] != lca) father[pre] = match[i]; // 同理
+		        InBlossom[base[i]] = true;
+		        InBlossom[base[match[i]]] = true;
+		    }
+		#undef pre
+		    if(base[x] != lca) father[x] = y;       //注意不能从lca这个奇环的关键点跳回来
+		    if(base[y] != lca) father[y] = x;
+		    for(i = 1; i <= n; i++) {
+		        if(InBlossom[base[i]]) {
+		            base[i] = lca;
+		            if(!inqueue[i]) {
+		                Q[tail++] = i;
+		                inqueue[i] = true;          //要注意如果本来连向BFS树中父结点的边是非匹配边的点，
+		                                            //可能是没有入队的
+		            }
+		        }
+		    }
+		}
+		
+		void Change() {
+		    int x, y, z;
+		    z = Finish;
+		    while(z) {
+		        y = father[z];
+		        x = match[y];
+		        match[y] = z;
+		        match[z] = y;
+		        z = x;
+		    }
+		}
+		
+		void FindAugmentPath() {
+		    int i;
+		    memset(father, 0, sizeof(father));
+		    memset(inqueue, false, sizeof(inqueue));
+		    for(i = 1; i <= n; i++) base[i] = i;
+		    head = tail = 0;
+		    Q[tail++] = Start;
+		    inqueue[Start] = 1;
+		    while(head < tail) {
+		        int x = Q[head++];
+		        for(int y = 1; y <= n; y++) {
+		            if(mp[x][y] && base[x] != base[y] && match[x] != y) {    //无意义的边
+		                if(Start == y || match[y] && father[match[y]]) {        //精髓地用father表示该点是否
+		                    BlossomContract(x, y);
+		                }
+		                else if(!father[y]) {
+		                    father[y] = x;
+		                    if(match[y]) {
+		                        Q[tail++] = match[y];
+		                        inqueue[match[y]] = true;
+		                    }
+		                    else {
+		                        Finish = y;
+		                        Change();
+		                        return;
+		                    }
+		                }
+		            }
+		        }
+		    }
+		}
+		
+		void Edmonds() {
+		    memset(match, 0, sizeof(match));
+		    for(Start = 1; Start <= n; Start++) {
+		        if(match[Start] == 0) {
+		            FindAugmentPath();
+		        }
+		    }
+		}
+		
+		void output() {
+		    memset(mark, false, sizeof(mark));
+		    int i, cnt = 0;
+		    for(i = 1; i <= n; i++) {
+		        if(match[i]) cnt++;         //计算N个点中匹配好的点数
+		    }
+		//    printf("%d\n", cnt);          //输出匹配关系
+		//    for(int i = 1; i <= n; i++) {
+		//        if(!mark[i] && match[i]) {
+		//            mark[i] = true;
+		//            mark[match[i]] = true;
+		//            printf("%d %d\n", i, match[i]);
+		//        }
+		//    }
+		    if(cnt < n) {
+		        printf("NO\n");
+		    }
+		    else {
+		        printf("YES\n");
+		    }
+		}
+
+
+
+
+*	一般图最小权完美匹配   
+
+####    12. **最大流**
+
+*   Dinic
+
+        //dinic
+        const int MOD = 1000000007;
+        #define Maxn 10000
+        #define Maxm 100000
+        struct node {
+            int u, v, c, w, next;
+        }e[Maxm];
+        int tot, last[Maxn], cur[Maxn];
+        int head, tail, top, que[Maxn], sta[Maxn], dist[Maxn];
+        
+        bool bfs(int s, int t, int n) {
+            int i, j, u, v;
+            for(i = 0; i < n; i++) dist[i] = MOD;
+            dist[s] = 0;
+            head = tail = 0;
+            que[tail++] = s;
+            while(head < tail) {
+                u = que[head++];
+                for(j = last[u]; j != -1; j = e[j].next) {
+                    if(e[j].c == 0) continue;
+                    v = e[j].v;
+                    if(dist[v] > dist[u] + 1) {
+                        dist[v] = dist[u] + 1;
+                        if(v == t) return true;
+                        que[tail++] = v;
+                    }
+                }
+            }
+            return false;
+        }
+        
+        int dinic(int s, int t, int n) {
+            int i, j, u, v;
+            int maxflow = 0;
+            while(bfs(s, t, n)) {
+                for(i = 0; i < n; i++) cur[i] = last[i];
+                u = s; top = 0;
+                while(cur[s] != -1) {
+                    if(u == t) {
+                        int tp = MOD;
+                        for(i = top - 1; i >= 0; i--) {
+                            tp = min(tp, e[sta[i]].c);
+                        }
+                        maxflow += tp;
+                        for(i = top - 1; i >= 0; i--) {
+                            e[sta[i]].c -= tp;
+                            e[sta[i] ^ 1].c += tp;
+                            if(e[sta[i]].c == 0) top = i;
+                        }
+                        u = e[sta[top]].u;
+                    }
+                    else if(cur[u] != -1 && e[cur[u]].c > 0 && dist[u] + 1 == dist[e[cur[u]].v]) {
+                        sta[top++] = cur[u];
+                        u = e[cur[u]].v;
+                    }
+                    else {
+                        while(u != s && cur[u] == -1) {
+                            u = e[sta[--top]].u;
+                        }
+                        cur[u] = e[cur[u]].next;
+                    }
+                }
+            }
+            return maxflow;
+        }
+
+*   ISAP
+
+*	平面图最小割转最短路
+
+*   常见建图方式
+    
+        B[u,v]表示(u,v)流量的下限，C[u,v]表示(u,v)流量的上限, F[u,v]表示(u,v)的流量,
+        g[u,v]表示F[u,v]-B[u,v] 显然 0<=g[u,v]<=C[u,v]-B[u,v] 
+          
+        1.无源汇的可行流 :
+        我们要想办法转换为有源汇的最大流问题.
+        考虑流量都为g[,]且容量为C[,]-B[,]的网络，貌似有点接近最后的转换方式了，
+        为了不忽略B[,]这一条件，我们把g[,]最后强制加上B[,].
+        但会发现一个致命漏洞，加上后就未必满足流量平衡了！
+        对于这个有两种办法解决..
+        一种方法是 添加附加源汇S,T  对于某点 u, 设 M(u)=sigma(B[i,u])-sigma(B[u,j]) ，
+                           则根据流量平衡条件有 M(u)同时等于 sigma(g[u,j])-sigma(g[i,u])
+                           若M(u)<0，即sigma(g[u,j]) < sigma(g[i,u]) 进入u的流量比从u 出去的多，
+                                             所以 u -> T 连容量为  -(sigma(B[i,u])-sigma(B[u,j]) ) 的边
+                          同理. M(u)>0时，即 S->u 连容量为 sigma(B[i,u])-sigma(B[u,j])  的边.
+                          然后再 对于任意边(i,u)/(u,j) 连一条 C[u,v]-B[u,v]的边.
+                          这样 只需对新的网络求一遍最大流即可. 若出附加源点的边都满流即是存在可行流，反之不然.
+                          满流的必要条件是显然的. 不满流不能保证加上B[,]后流量平衡. 前面都白费了.
+        另一种方法相对简单.其实类似，本质相同.
+                        仍添加附加源汇S,T 对于某边 (u,v) 在新网络中连边
+                        S->v 容量 B[u,v]   ,  u->T 容量 B[u,v]  ， u->v 容量 C[u,v]-B[u,v]
+                        可以这样理解，边S->v : 求的时候直接从S流过来的流量值B[u,v], 与最终解中边(u,v)强制加上的从 u流过来的流量B[u,v]，对v点的流量平衡条件的影响 实质等价.
+                       边u->T同理.
+                       最后，一样也是求一下新网络的最大流，判断从附加源点的边，是否都满流即可.
+          
+        具体的解？根据最前面提出的强制转换方式，边(u,v)的最终解中的实际流量即为g[u,v]+B[u,v]
+        为什么这种方法只适用于无源汇上下界可行流？
+        本质上是因为S,T并不满足流量平衡，而上述的方法都是考虑到每点的流量平衡而建的. 但有些时候貌似还是可以出正确解. 至于有没有什么解决方法，下次再想想吧~【标记下】
+        例题 ZOJ 2314 / SGU 194 Reactor Cooling http://acm.sgu.ru/problem.php?contest=0&problem=194
+        2.有源汇的上下界可行流
+        从汇点到源点连一条上限为INF，下限为0的边. 按照 1.无源汇的上下界可行流 一样做即可.
+        改成无源汇后，求的可行流是类似环的，流量即T->S边上的流量.  这样做显然使S,T也变得流量平衡了.
+        3.有源汇的上下界最大流
+        方法一 ： 2.有源汇上下界可行流中，从汇点到源点的边改为连一条上限为INF，下限为x的边.
+        因为显然x>ans即MIN(T->S )> MAX(S->T) ,会使求新网络的无源汇可行流无解的（S,T流量怎样都不能平衡）
+        而x<=ans会有解.
+        所以满足二分性质，二分x，最大的x使得新网络有解的即是所求答案原图最大流.
+        方法二：从汇点T到源点S连一条上限为INF，下限为0的边，变成无源汇的网络.  照求无源汇可行流的方法(如1)，建附加源点S'与汇点T'，求一遍S'->T‘的最大流. 再把从汇点T到源点S的这条边拆掉 . 求一次从S 到T 的最大流即可. （关于S',T'的边好像可以不拆？）（这样一定满足流量平衡？）表示这方法我也没有怎么理解.
+        4.有源汇的上下界最小流
+        方法一： 2.有源汇上下界可行流中，从汇点到源点的边改为连一条上限为x，下限为0的边.
+        与3同理，二分上限，最小的x使新网络无源汇可行流有解，即是所求答案原图最小流.
+        方法二:  照求无源汇可行流的方法(如1)，建附加源点S'与汇点T'，求一遍S'->T‘的最大流. 但是注意这一遍不加汇点到源点的这条边，即不使之改为无源汇的网络去求解. 求完后，再加上那条汇点到源点上限INF的边. 因为这条边下限为0，所以S',T'无影响. 再直接求一遍S'->T'的最大流. 若S’出去的边全满流，T->S边上的流量即为答案原图最小流，否则若不全满流即无解.
+         和求3.有源汇的上下界最大流过程相反，感性理解是: 
+        首先明确，我们的方法是通过加边转化成对任一点都有流量平衡的无源汇的网络，进行求解.
+        即最终解只能是加上边后，求的无源汇可行流，即T->S这边上的流量.  不改成无源汇的直接求的解是未必正确的，在（1）中已经提到.
+        然后，因为第一遍做的时候并无这条边，所以S->T的流量在第一遍做的时候都已经尽力往其他边流了. 于是加上T->S这条边后，都是些剩余的流不到其他边的流量. 从而达到尽可能减少T->S这边上的流量的效果，即减小了最终答案.
+        感觉上第一遍做的既然是不改成无源汇直接求的，应该是错误的？
+        这里不是错误的. 首先我们的解都是按照第二遍所求的而定，其次这里这样做本质是延迟对T->S这条边的增流.
+
+
+
+
+####    13. **费用流**  
+
+
+
+####    14. **全局最小割**  
+
+
+
+####    15. **网络流拓展**  
+
+
+
+####    16. **并查集**
+
+
+
+####    17. *最小树形图(有向图的最小生成树)*   
+
+		hdu4009 hdu2121 poj3164 UVa11865
+
+		本题为不是固定根的最小树形图，我们可以虚拟出一根来，然后在把这个根跟每个点相连，相连的点可以设为无穷大，或者设为所有边和大一点，比如为r，然后就可以利用最小树形图进行计算了，计算出的结果减去r,如果比r还大就可以认为通过这个虚拟节点我们连过原图中两个点，即原图是不连通的，我们就可以认为不存在最小树形图。关于输出最小根也挺简单，在找最小入弧时，如果这条弧的起点是虚拟根，那么这条弧的终点就是要求的根
+
+*	朱刘算法
+
+	验题:POJ3164 HDU2121
+
+		/* 
+		 * 最小树形图（根固定）     O(VE)
+		 * 有向图最小生成树
+		 * 根不固定，添加一个根节点与所有点连无穷大的边！
+		 * 如果求出比2*MOD大, 则不连通; 求根, 则求和虚拟根相连的结点
+		 * 根据pre的信息能构造出这棵树！
+		 * 注意结点必须从0~n-1, 因为要考虑重新标号建图的统一
+		 * mytype 根据实际情况确定
+		 */
+		typedef int mytype;
+		int visit[Maxn], pre[Maxn], belong[Maxn], ROOT;
+		mytype inv[Maxn]; 
+		mytype dirtree(int n, int m, int root) {
+		    mytype sum = 0;
+		    int i, j, k, u, v;
+		    while (1) {
+		        for (i = 0; i < n; i++) {
+		            inv[i] = MOD;
+		            pre[i] = -1;
+		            belong[i] = -1;
+		            visit[i] = -1;
+		        }
+		        inv[root] = 0;
+		        for (i = 0; i < m; i++) {//除原点外，找每个点的最小入边
+		            u = e[i].u; v = e[i].v;
+		            if (u != v) {
+		                if (e[i].w < inv[v]) {
+		                    inv[v] = e[i].w;
+		                    pre[v] = u;
+		                    if(u == root) ROOT = i; //记录根所在的边
+		                                            //输出根时利用ROOT-m计算是原图哪个结点
+		                }
+		            }
+		        }
+		        for (i = 0; i < n; i++) {
+		            
+		            if (inv[i] == MOD) return -1;
+		        }
+		        int num = 0;
+		        for (i = 0; i < n; i++) { //找圈，收缩圈
+		            if (visit[i] == -1) {
+		                j = i;
+		                for(j = i; j != -1 && visit[j] == -1 && j != root; j = pre[j]) {
+		                    visit[j] = i;
+		                }
+		                if (j != -1 && visit[j] == i) {
+		                    for (k = pre[j]; k != j; k = pre[k]) {
+		                        belong[k] = num;
+		                    }
+		                    belong[j] = num ++ ;
+		                }
+		            }
+		            sum += inv[i];
+		        }
+		        if (num == 0) return sum;
+		        for (i = 0; i < n; i++){
+		            if (belong[i] == -1) {
+		                belong[i] = num ++ ;
+		            }
+		        }
+		        for (i = 0; i < m; i++) { //重新构图
+		            e[i].w = e[i].w - inv[e[i].v];
+		            e[i].v = belong[e[i].v];
+		            e[i].u = belong[e[i].u];
+		        }
+		        n = num;
+		        root = belong[root];
+		    }
+		}
+
+
+####    18. **树的同构**  
+
+
+
+####    19. **差分约束**  
+
+
+
+####    20. **分数规划**  
+
+
+
+####    21. **偏序集** 
+
+
+
+####    22. **最大团**  
+
+*   最大团
+*   极大团计数
+
+
+####     23. **斯坦纳树**  
+
+
+
+
+####     24. **图的hash**  
+
+
+
+####    25. **弦图完美消除序列**  
+
+
+
+####	26. **Other**
+
+*	中国邮递员
+
+####	27. **待解决的问题**
+
+* 	最短路
+
+	字典序最小的路径
+	
+		有重复标号(如给定边长度和边标号, 输出最短路径上每条边给定的标号的最小字典序)???
+
+*	最小环&最大环
+
+	最大环可做???
+
+* 	拓扑排序
+
+	POJ1128
+
+	字典序最小的拓扑排序
+
+		有重复标号字典序最小???
+
