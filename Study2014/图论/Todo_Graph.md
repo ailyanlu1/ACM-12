@@ -43,7 +43,6 @@
 
 *   度限制最小生成树  
 
-
 *   动态最小生成树  
 
 
@@ -73,7 +72,7 @@
 
 	无重复标号(如给定边长度, 输出最短路径上经过的结点的最小字典序):hdu1385
 
-	有重复标号(如边长度都为d, 每条边给定标号, 输出最短路径上边标号的最小字典序)
+	有重复标号(如边长度都为d, 每条边给定标号, 输出最短路径上边标号的最小字典序)http://codeforces.com/gym/100084 (I题)
 
 	有重复标号(如给定边长度和边标号, 输出最短路径上每条边给定的标号的最小字典序)???
 
@@ -106,8 +105,39 @@
             1，对于有向边，舍弃；对于无向边，就按照最开始指定的方向建权值为 1 的边；  
             2，对于入度小于出度的点，从源点连一条到它的边，权值为（outdeg - indeg）/2；出度小于入度的点，连一条它到汇点的权值为（indeg - outdeg）/2 的边；  
             构图完成，如果满流（求出的最大流值 == 和汇点所有连边的权值之和），那么存在欧拉回路，否则不存在。  
-
-    
+	建图基础:
+		
+		//outdeg出度, indeg入度, !w双向边
+		for(i = 0; i < m; i++) {
+            scanf("%d%d%d", &u, &v, &w);
+            outdeg[u]++;
+            indeg[v]++;
+            if(!w) {
+                adde(u, v, 1);
+            }
+        }
+        int flag = true;
+        for(i = 1; i <= n; i++) {
+            if(abs(indeg[i] - outdeg[i]) & 1) {
+                flag = false;
+                break;
+            }
+        }
+        if(flag) {
+            S = 0; T = n + 1; sums = sumt = 0;
+            for(i = 1; i <= n; i++) {
+                if(outdeg[i] > indeg[i]) {
+                    adde(S, i, (outdeg[i] - indeg[i]) / 2);
+                    sums += (outdeg[i] - indeg[i]) / 2;
+                }
+                if(indeg[i] > outdeg[i]) {
+                    adde(i, T, (indeg[i] - outdeg[i]) / 2);
+                    sumt += (indeg[i] - outdeg[i]) / 2;
+                }
+            }
+            int flow = dinic(S, T, T + 1);
+            if(flow != sums) flag = false;
+        }
 
 ####    04.	**哈密尔顿回路**
 
@@ -314,6 +344,8 @@
 
 *	匈牙利 + 贪心优化
 
+		// O(n*m)
+		// 可以处理n=3000规模
 		struct enode {
 		    int v, next;
 		}e[Maxm];
@@ -376,7 +408,7 @@
 
 *	HK (O(E*N^0.5))
 
-	验题: HDU 2389  spoj 4206
+	验题: HDU 2389  spoj 4206(n=50000,m=150000)
 
 		/*
 		 *  HK O(E*V^0.5) 最大匹配
@@ -594,13 +626,20 @@
 
 
 
-*	一般图最小权完美匹配   
+*	一般图最小权匹配   
+
+		可将求一般图最小权完美匹配的问题转化为求最大权完美匹配的问题，在杜端甫编著的《运筹图论》和龚劬编的《图论与网络最优化算法》中均介绍了求一般图最大权完美匹配的算法，可参考。
 
 ####    12. **最大流**
 
-*   Dinic
+*	EK 
 
-        //dinic
+		//EK O(n*m^2)
+		//每次找最短路, 直接调整流量
+
+*   Dinic 
+
+        //dinic O(m*n^2)
         const int MOD = 1000000007;
         #define Maxn 10000
         #define Maxm 100000
@@ -610,61 +649,66 @@
         int tot, last[Maxn], cur[Maxn];
         int head, tail, top, que[Maxn], sta[Maxn], dist[Maxn];
         
-        bool bfs(int s, int t, int n) {
-            int i, j, u, v;
-            for(i = 0; i < n; i++) dist[i] = MOD;
-            dist[s] = 0;
-            head = tail = 0;
-            que[tail++] = s;
-            while(head < tail) {
-                u = que[head++];
-                for(j = last[u]; j != -1; j = e[j].next) {
-                    if(e[j].c == 0) continue;
-                    v = e[j].v;
-                    if(dist[v] > dist[u] + 1) {
-                        dist[v] = dist[u] + 1;
-                        if(v == t) return true;
-                        que[tail++] = v;
-                    }
-                }
-            }
-            return false;
-        }
-        
-        int dinic(int s, int t, int n) {
-            int i, j, u, v;
-            int maxflow = 0;
-            while(bfs(s, t, n)) {
-                for(i = 0; i < n; i++) cur[i] = last[i];
-                u = s; top = 0;
-                while(cur[s] != -1) {
-                    if(u == t) {
-                        int tp = MOD;
-                        for(i = top - 1; i >= 0; i--) {
-                            tp = min(tp, e[sta[i]].c);
-                        }
-                        maxflow += tp;
-                        for(i = top - 1; i >= 0; i--) {
-                            e[sta[i]].c -= tp;
-                            e[sta[i] ^ 1].c += tp;
-                            if(e[sta[i]].c == 0) top = i;
-                        }
-                        u = e[sta[top]].u;
-                    }
-                    else if(cur[u] != -1 && e[cur[u]].c > 0 && dist[u] + 1 == dist[e[cur[u]].v]) {
-                        sta[top++] = cur[u];
-                        u = e[cur[u]].v;
-                    }
-                    else {
-                        while(u != s && cur[u] == -1) {
-                            u = e[sta[--top]].u;
-                        }
-                        cur[u] = e[cur[u]].next;
-                    }
-                }
-            }
-            return maxflow;
-        }
+        void adde(int u, int v, int c) {
+		    e[tot].u = u; e[tot].v = v; e[tot].c = c; e[tot].next = last[u]; last[u] = tot++;
+		    e[tot].u = v; e[tot].v = u; e[tot].c = 0; e[tot].next = last[v]; last[v] = tot++;
+		}
+		
+		bool bfs(int s, int t, int n) {
+		    int i, j, u, v;
+		    for(i = 0; i < n; i++) dist[i] = MOD;
+		    dist[s] = 0;
+		    head = tail = 0;
+		    que[tail++] = s;
+		    while(head < tail) {
+		        u = que[head++];
+		        for(j = last[u]; j != -1; j = e[j].next) {
+		            if(e[j].c == 0) continue;
+		            v = e[j].v;
+		            if(dist[v] > dist[u] + 1) {
+		                dist[v] = dist[u] + 1;
+		                if(v == t) return true;
+		                que[tail++] = v;
+		            }
+		        }
+		    }
+		    return false;
+		}
+		
+		int dinic(int s, int t, int n) {
+		    int i, j, u, v;
+		    int maxflow = 0;
+		    while(bfs(s, t, n)) {
+		        for(i = 0; i < n; i++) cur[i] = last[i];
+		        u = s; top = 0;
+		        while(cur[s] != -1) {
+		            if(u == t) {
+		                int tp = MOD;
+		                for(i = top - 1; i >= 0; i--) {
+		                    tp = min(tp, e[sta[i]].c);
+		                }
+		                maxflow += tp;
+		                for(i = top - 1; i >= 0; i--) {
+		                    e[sta[i]].c -= tp;
+		                    e[sta[i] ^ 1].c += tp;
+		                    if(e[sta[i]].c == 0) top = i;
+		                }
+		                u = e[sta[top]].u;
+		            }
+		            else if(cur[u] != -1 && e[cur[u]].c > 0 && dist[u] + 1 == dist[e[cur[u]].v]) {
+		                sta[top++] = cur[u];
+		                u = e[cur[u]].v;
+		            }
+		            else {
+		                while(u != s && cur[u] == -1) {
+		                    u = e[sta[--top]].u;
+		                }
+		                cur[u] = e[cur[u]].next;
+		            }
+		        }
+		    }
+		    return maxflow;
+		}
 
 *   ISAP
 
@@ -725,7 +769,369 @@
 
 ####    13. **费用流**  
 
+*	spfa
 
+	验题: 3680  
+
+		struct node {
+		    int u, v, c, w, next;
+		} e[Maxm];
+		int tot, last[Maxn];
+		int dist[Maxn], pre[Maxn];
+		bool visit[Maxn];
+		queue<int> Q;
+		#define MOD 0x3f3f3f3f
+		
+		void adde (int u, int v, int c, int w) {
+		    e[tot].u = u; e[tot].v = v; e[tot].c = c; e[tot].w = w; e[tot].next = last[u]; last[u] = tot++;
+		    e[tot].u = v; e[tot].v = u; e[tot].c = 0; e[tot].w = -w; e[tot].next = last[v]; last[v] = tot++;
+		}
+		
+		bool spfa (int s, int t, int n) {
+		    memset (dist, 0x3f, sizeof (dist[0]) * (n + 3) );
+		    memset (visit, 0, sizeof (visit[0]) * (n + 3) );
+		    memset (pre, -1, sizeof (pre[0]) * (n + 3) );
+		    while (!Q.empty() ) Q.pop();
+		    Q.push (s);
+		    visit[s] = true;
+		    dist[s] = 0;
+		    pre[s] = -1;
+		    while (!Q.empty() ) {
+		        int u = Q.front();
+		        visit[u] =false;
+		        Q.pop();
+		        for (int j = last[u]; j != -1; j = e[j].next)
+		            if (e[j].c > 0 && dist[u] + e[j].w < dist[e[j].v]) {
+		                dist[e[j].v] = dist[u] + e[j].w;
+		                pre[e[j].v] = j;
+		                if (!visit[e[j].v]) {
+		                    Q.push (e[j].v);
+		                    visit[e[j].v] = true;
+		                }
+		            }
+		    }
+		    if (dist[t] == MOD) return false;
+		    else return true;
+		}
+		
+		int ChangeFlow (int t) {
+		    int det = MOD, u = t;
+		    while (~pre[u]) {
+		        u = pre[u];
+		        det = min (det, e[u].c);
+		        u = e[u].u;
+		    }
+		    u = t;
+		    while (~pre[u]) {
+		        u = pre[u];
+		        e[u].c -= det;
+		        e[u ^ 1].c += det;
+		        u = e[u].u;
+		    }
+		    return det;
+		}
+		
+		int MinCostFlow (int s, int t, int n) {
+		    int mincost, maxflow;
+		    mincost = maxflow = 0;
+		    while (spfa (s, t, n) ) {
+		        int det = ChangeFlow (t);
+		        mincost += det * dist[t];
+		        maxflow += det;
+		    }
+		    return mincost;
+		}
+
+*	zkw
+	
+	验题: 3680  
+
+	朴素zkw(存在bug)
+		
+		//没有优化, 但是存在找到第一条可行流而计算不到费用的情况
+		//不可以用了!!!
+		#define MOD 0x3f3f3f3f
+		int flow, cost, value;
+		int dist[Maxn], visit[Maxn], src, des;
+		deque<int> Q;
+
+		void adde(int u, int v, int c, int w) {
+		    e[tot].u = u; e[tot].v = v; e[tot].c = c; e[tot].w = w; e[tot].next = last[u]; last[u] = tot++;
+		    e[tot].u = v; e[tot].v = u; e[tot].c = 0; e[tot].w = -w; e[tot].next = last[v]; last[v] = tot++;
+		}
+
+		int Aug(int u, int m) {
+		    if(u == des) {
+		        cost += value * m;
+		        flow += m;
+		        return m;
+		    }
+		    visit[u] = true;
+		    int l = m;
+		    int j, v, c, w;
+		    for(j = last[u]; j != -1; j = e[j].next) {
+		        v = e[j].v; c = e[j].c; w = e[j].w;
+		        if(c && !w && !visit[v]) {
+		            int del = Aug(v, l < c ? l : c);
+		            e[j].c -= del; e[j ^ 1].c += del; l -= del;
+		            if(!l) return m;
+		        }
+		    }
+		    return m - l;
+		}
+		 
+		 
+		bool Modlabel(int src, int des, int n) {
+		    int i, j, u, v, c, w, del;
+		    del = MOD;
+		    for(i = 0; i < n; i++) {
+		        if(visit[i]) {
+		            for(j = last[i]; j != -1; j = e[j].next) {
+		                if(e[j].c && !visit[e[j].v] && e[j].w < del) del = e[j].w;
+		            }
+		        }
+		    }
+		    if(del == MOD) return false;
+		    for(i = 0; i < n; i++) {
+		        if(visit[i]) {
+		            for(j = last[i]; j != -1; j = e[j].next) {
+		                e[j].w -= del; e[j ^ 1].w += del;
+		            }
+		        }
+		    }
+		    value += dist[des];
+		    return true;
+		}
+		 
+		void zkw(int src, int des, int n) {
+		    value = cost = flow = 0;
+		   do {
+		       do {
+		            memset(visit, 0, sizeof(visit[0]) * (n + 3));
+		       }while(Aug(src, MOD));
+		   }while(Modlabel(src, des, n));
+		}
+	  
+	zkw+deque
+
+		#define MOD 0x3f3f3f3f
+		int flow, cost, value;
+		int dist[Maxn], visit[Maxn], src, des;
+		deque<int> Q;
+
+		void adde(int u, int v, int c, int w) {
+		    e[tot].u = u; e[tot].v = v; e[tot].c = c; e[tot].w = w; e[tot].next = last[u]; last[u] = tot++;
+		    e[tot].u = v; e[tot].v = u; e[tot].c = 0; e[tot].w = -w; e[tot].next = last[v]; last[v] = tot++;
+		}
+
+		int Aug(int u, int m) {
+		    if(u == des) {
+		        cost += value * m;
+		        flow += m;
+		        return m;
+		    }
+		    visit[u] = true;
+		    int l = m;
+		    int j, v, c, w;
+		    for(j = last[u]; j != -1; j = e[j].next) {
+		        v = e[j].v; c = e[j].c; w = e[j].w;
+		        if(c && !w && !visit[v]) {
+		            int del = Aug(v, l < c ? l : c);
+		            e[j].c -= del; e[j ^ 1].c += del; l -= del;
+		            if(!l) return m;
+		        }
+		    }
+		    return m - l;
+		}
+		 
+		bool Modlabel(int src, int des, int n) {
+		    int i, j, u, v, c, w, del;
+		    memset(dist, 0x3f, sizeof(dist[0])*(n + 3));
+		    dist[src] = 0;
+		    while(!Q.empty()) Q.pop_back();
+		    Q.push_back(src);
+		    while(!Q.empty()) {
+		        u = Q.front(); Q.pop_front();
+		        for(j = last[u]; j != -1; j = e[j].next) {
+		            v = e[j].v; c = e[j].c; w = e[j].w;
+		            if(c && (del = dist[u] + w) < dist[v]) {
+		                dist[v] = del;
+		                if(Q.empty() || del <= dist[Q.front()]) {
+		                    Q.push_front(v);
+		                }
+		                else {
+		                    Q.push_back(v);
+		                }
+		            }
+		        }
+		    }
+		    for(i = 0; i < n; i++) {
+		        for(j = last[i]; j != -1; j = e[j].next) {
+		            e[j].w -= dist[e[j].v] - dist[i];
+		        }
+		    }
+		    value += dist[des];
+		    return dist[des] < MOD;
+		}
+		 
+		void zkw(int src, int des, int n) {
+		    value = cost = flow = 0;
+		   while(Modlabel(src, des, n)){
+		       do {
+		            memset(visit, 0, sizeof(visit[0]) * (n + 3));
+		       }while(Aug(src, MOD));
+		   }
+		}
+		
+	zkw+priority_queue
+
+		#define MOD 0x3f3f3f3f
+		int flow, cost, value;
+		int dist[Maxn], visit[Maxn], src, des;
+		priority_queue<pair<int, int> > Q;
+
+		void adde(int u, int v, int c, int w) {
+		    e[tot].u = u; e[tot].v = v; e[tot].c = c; e[tot].w = w; e[tot].next = last[u]; last[u] = tot++;
+		    e[tot].u = v; e[tot].v = u; e[tot].c = 0; e[tot].w = -w; e[tot].next = last[v]; last[v] = tot++;
+		}
+
+		int Aug(int u, int m) {
+		    if(u == des) {
+		        cost += value * m;
+		        flow += m;
+		        return m;
+		    }
+		    visit[u] = true;
+		    int l = m;
+		    int j, v, c, w;
+		    for(j = last[u]; j != -1; j = e[j].next) {
+		        v = e[j].v; c = e[j].c; w = e[j].w;
+		        if(c && !w && !visit[v]) {
+		            int del = Aug(v, l < c ? l : c);
+		            e[j].c -= del; e[j ^ 1].c += del; l -= del;
+		            if(!l) return m;
+		        }
+		    }
+		    return m - l;
+		}
+		 
+		bool Modlabel(int src, int des, int n) {
+		    int i, j, u, v, c, w, del, d;
+		    memset(dist, 0x3f, sizeof(dist[0])*(n + 3));
+		    dist[src] = 0;
+		    while(!Q.empty()) Q.pop();
+		    Q.push(MP(0, src));
+		    while(!Q.empty()) {
+		        u = Q.top().BB;
+		        d = -Q.top().AA;
+		        Q.pop();
+		        if(d != dist[u]) continue;
+		        for(j = last[u]; j != -1; j = e[j].next) {
+		            v = e[j].v; c = e[j].c; w = e[j].w;
+		            if(c && (del = d + w) < dist[v]) {
+		                dist[v] = del;
+		                Q.push(MP(-del, v));
+		            }
+		        }
+		    }
+		    for(i = 0; i < n; i++) {
+		        for(j = last[i]; j != -1; j = e[j].next) {
+		            e[j].w -= dist[e[j].v] - dist[i];
+		        }
+		    }
+		    value += dist[des];
+		    return dist[des] < MOD;
+		}
+		 
+		void zkw(int src, int des, int n) {
+		    value = cost = flow = 0;
+		   while(Modlabel(src, des, n)){
+		       do {
+		            memset(visit, 0, sizeof(visit[0]) * (n + 3));
+		       }while(Aug(src, MOD));
+		   }
+		}
+
+	zkw+queue
+
+		//zkw queue实现
+		#define MOD 0x3f3f3f3f
+		int flow, cost, value;
+		int dist[Maxn], visit[Maxn], src, des;
+		queue<int> Q;
+
+		void adde(int u, int v, int c, int w) {
+		    e[tot].u = u; e[tot].v = v; e[tot].c = c; e[tot].w = w; e[tot].next = last[u]; last[u] = tot++;
+		    e[tot].u = v; e[tot].v = u; e[tot].c = 0; e[tot].w = -w; e[tot].next = last[v]; last[v] = tot++;
+		}
+
+		int Aug(int u, int m) {
+		    if(u == des) {
+		        cost += value * m;
+		        flow += m;
+		        return m;
+		    }
+		    visit[u] = true;
+		    int l = m;
+		    int j, v, c, w;
+		    for(j = last[u]; j != -1; j = e[j].next) {
+		        v = e[j].v; c = e[j].c; w = e[j].w;
+		        if(c && !w && !visit[v]) {
+		            int del = Aug(v, l < c ? l : c);
+		            e[j].c -= del; e[j ^ 1].c += del; l -= del;
+		            if(!l) return m;
+		        }
+		    }
+		    return m - l;
+		}
+		 
+		bool Modlabel(int src, int des, int n) {
+		    int i, j, u, v, c, w, del;
+		    memset(dist, 0x3f, sizeof(dist[0])*(n + 3));
+		    dist[src] = 0;
+		    while(!Q.empty()) Q.pop();
+		    Q.push(src);
+		    while(!Q.empty()) {
+		        u = Q.front(); Q.pop();
+		        for(j = last[u]; j != -1; j = e[j].next) {
+		            v = e[j].v; c = e[j].c; w = e[j].w;
+		            if(c && (del = dist[u] + w) < dist[v]) {
+		                dist[v] = del;
+		                Q.push(v);
+		            }
+		        }
+		    }
+		    for(i = 0; i < n; i++) {
+		        for(j = last[i]; j != -1; j = e[j].next) {
+		            e[j].w -= dist[e[j].v] - dist[i];
+		        }
+		    }
+		    value += dist[des];
+		    return dist[des] < MOD;
+		}
+		 
+		void zkw(int src, int des, int n) {
+		    value = cost = flow = 0;
+		    while(Modlabel(src, des, n)) {
+		        do {
+		            memset(visit, 0, sizeof(visit[0]) * (n + 3));
+		        } while(Aug(src, MOD));
+		    }
+		}
+
+	对于poj3680效率比较:
+		
+		nocow上zkw板块的作者代码可以达到360ms
+		
+		最快是 zkw + deque 860ms
+		
+		其次是 zkw + priority_queue 1250ms
+		
+		然后是 zkw + queue 2094ms
+		
+		对于普通spfa 2407ms
+		
+		另外, 手写que需要注意, 一个点可能入队不止一次.
 
 ####    14. **全局最小割**  
 
@@ -862,6 +1268,8 @@
 ####	27. **待解决的问题**
 
 * 	最短路
+
+	HDU 3873
 
 	字典序最小的路径
 	
