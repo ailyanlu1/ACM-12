@@ -644,10 +644,10 @@
         #define Maxn 10000
         #define Maxm 100000
         struct node {
-            int u, v, c, w, next;
-        }e[Maxm];
-        int tot, last[Maxn], cur[Maxn];
-        int head, tail, top, que[Maxn], sta[Maxn], dist[Maxn];
+		    int u, v, c, next;
+		}e[Maxm];
+		int tot, last[Maxn];
+		int cur[Maxn], dist[Maxn], que[Maxn], sta[Maxn], top, head, tail;
         
         void adde(int u, int v, int c) {
 		    e[tot].u = u; e[tot].v = v; e[tot].c = c; e[tot].next = last[u]; last[u] = tot++;
