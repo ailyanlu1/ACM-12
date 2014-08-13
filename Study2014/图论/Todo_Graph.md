@@ -1,4 +1,4 @@
-##  Graph Template
+s##  Graph Template
 
 ******  
 ### **Contents** 
@@ -1264,6 +1264,15 @@
 ####	26. **Other**
 
 *	中国邮递员
+*	网络流相关:
+
+		1、 连续最短路算法（Successive Shortest Path）；
+	
+		2、 消圈算法（Cycle Canceling）；
+		
+		3、 原始对偶算法（Primal Dual）；
+		
+		4、 网络单纯形（Network Simplex）。
 
 ####	27. **待解决的问题**
 
