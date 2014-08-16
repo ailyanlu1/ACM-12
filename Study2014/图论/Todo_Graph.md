@@ -329,7 +329,12 @@ s##  Graph Template
 
 ####    08.  **LCA**  
 
+*	倍增算法
 
+	* 	增加对0点的支持(f[][]数组初始值等问题
+	* 	记得验题
+
+*	Tarjan
 
 
 ####    09.  **连通性**  
@@ -649,9 +654,9 @@ s##  Graph Template
 		int tot, last[Maxn];
 		int cur[Maxn], dist[Maxn], que[Maxn], sta[Maxn], top, head, tail;
         
-        void adde(int u, int v, int c) {
+        void adde(int u, int v, int c, int c1) {
 		    e[tot].u = u; e[tot].v = v; e[tot].c = c; e[tot].next = last[u]; last[u] = tot++;
-		    e[tot].u = v; e[tot].v = u; e[tot].c = 0; e[tot].next = last[v]; last[v] = tot++;
+		    e[tot].u = v; e[tot].v = u; e[tot].c = c1; e[tot].next = last[v]; last[v] = tot++;
 		}
 		
 		bool bfs(int s, int t, int n) {
@@ -711,6 +716,69 @@ s##  Graph Template
 		}
 
 *   ISAP
+
+		//ISAP O(m*n^2)
+		struct node {
+		    int u, v, c, next;
+		}e[Maxm];
+		int tot, last[Maxn];
+		void adde(int u, int v, int c, int c1) {
+		    e[tot].u = u; e[tot].v = v; e[tot].c = c; e[tot].next = last[u]; last[u] = tot++;
+		    e[tot].u = v; e[tot].v = u; e[tot].c = c1; e[tot].next = last[v]; last[v] = tot++;
+		}
+		
+		int dist[Maxn], cur[Maxn], gap[Maxn], pre[Maxn];
+		int ISAP(int s, int t, int n) {
+		    int i, j, u, v, det;
+		    int maxflow = 0;
+		    memset(dist, 0, sizeof(dist[0]) * (n + 3));
+		    memset(cur, 0, sizeof(cur[0]) * (n + 3));
+		    memset(gap, 0, sizeof(gap[0]) * (n + 3));
+		    for (i = 0; i < n; i ++ )
+		        cur[i] = last[i];
+		    u = s;
+		    gap[0] = n;
+		    while (dist[s] <= n) {
+		        bool flag = false;
+		        for (j = cur[u]; j != -1; j = e[j].next) {
+		            v = e[j].v;
+		            if (e[j].c > 0 && dist[u] == dist[v] + 1) {
+		                flag = true;
+		                pre[v] = u;
+		                cur[u] = j;
+		                u = v;
+		                break;
+		            }
+		        }
+		        if (flag) {
+		            if (u == t) {
+		                int det = MOD;
+		                for (i = u; i != s; i = pre[i])
+		                    det = min(det, e[cur[pre[i]]].c);
+		                for (i = u; i != s; i = pre[i]) {
+		                    e[cur[pre[i]]].c -= det;
+		                    e[cur[pre[i]] ^ 1].c += det;
+		                }
+		                maxflow += det;
+		                u = s;
+		            }
+		        }
+		        else {
+		            int mind = n;
+		            for (j = last[u]; j != -1; j = e[j].next ) {
+		                v = e[j].v;
+		                if (e[j].c > 0 && dist[v] < mind) {
+		                    mind = dist[v];
+		                    cur[u] = j;
+		                }
+		            }
+		            if (( -- gap[dist[u]]) == 0) break;
+		            gap[dist[u] = mind + 1] ++ ;
+		            if (u != s) u = pre[u];
+		        }
+		    }
+		    return maxflow;
+		}
 
 *	平面图最小割转最短路
 
