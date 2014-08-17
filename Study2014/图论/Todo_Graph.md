@@ -715,6 +715,40 @@ s##  Graph Template
 		    return maxflow;
 		}
 
+	**“有提交就会有奇迹”的dinic**  
+	dinic是有技巧的，以下是我喜欢的19行版dinic  
+
+		//这是数组以及结构定义，不计算行数
+		int level[NMax+2],queue[NMax+2];
+		long long Min(long long a,long long b){
+			return a>b?b:a;
+		}
+		struct edge{
+			long long e,f;
+			edge *next,*opt;
+		}*E[NMax];
+		
+		//正文
+		int mkLevel(){
+			for (int i=0;i<N;i++)level[i]=-1;
+			int bot,x;
+			level[queue[0]=0]=0;bot=1;
+			for (int top=0;top<bot;top++){x=queue[top];
+				for (edge *p=E[x];p;p=p->next)if (p->f && level[p->e]==-1)
+					level[queue[bot++]=p->e]=level[x]+1;
+			}
+			return level[N-1]!=-1;
+		}
+		long long extend(int x,long long alpha){
+			if (x==N-1)return alpha;
+			long long r,t;r=0;
+			for (edge *p=E[x];p;p=p->next)if (p->f && level[p->e]==level[x]+1)
+				t=extend(p->e,Min(p->f,alpha-r)),p->f-=t,p->opt->f+=t,r+=t;
+			if (!r)level[x]=-1;
+			return r;
+		}
+		void Dinic(){while (mkLevel())extend(0,(long long)1<<60);}
+
 *   ISAP
 
 		//ISAP O(m*n^2)
