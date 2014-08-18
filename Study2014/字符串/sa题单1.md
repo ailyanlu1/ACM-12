@@ -3,7 +3,6 @@
  
 		poj 2758 (不会玩儿... 等等在做) 
 		poj 2406 (后缀数组做不了.....)
-		poj 3261  
 		poj 3415  
 		poj 3294   
 		poj 3693  
@@ -26,6 +25,9 @@
 		
 		poj 1226  (谁说的sa!!!暴枚可以过....不过sa可以很快O(nlogn),n为所有字符串总长度...
 		poj 2774 (求两个串的最长公共子串, 裸的sa, 注意调用da函数的长度要n+1 !!!!!) 
+		poj 3261  (二分答案, 从2~nfor语句判断连续>=k的有几个 110ms 太挫;
+		改了用st记录height的区间最小值, 二分答案, for判断47ms, 可以接受)
+		
 
 
 
@@ -38,7 +40,7 @@
 
 ------------------------------------------
 
-		//poj 3261
+		//poj 3415
 		#include <cstdio>
 		#include <cstring>
 		#include <cstdlib>
@@ -76,8 +78,8 @@
 		const double eps = 1e-8;
 		const LL MOD = 1000000007;
 		const LL INF = 0x3f3f3f3f;
-		#define Maxn 21111
-		#define Maxm 1011111
+		#define Maxn 1111
+		#define Maxm 111111
 		int num[Maxn], n, k;
 		int sa[Maxn], rank[Maxn], height[Maxn];
 		int wa[Maxn], wb[Maxn], wv[Maxn], wd[Maxn];
@@ -110,58 +112,42 @@
 		        for(k ? k-- : 0, j = sa[rank[i] - 1]; r[i + k] == r[j + k]; k++);
 		    }
 		}
-		vector<int> g;
-		
-		void pre() {
-		    int i, j;
-		    for(i = 1; i <= n; i++) st[i][0] = height[i];
-		    for(j = 2; j <= n; j <<= 1) {
-		        for(i = 1; i + j <= n; i++) {
-		            st[i][j] = min(st[i][j - 1], st[i + (1<<(j - 1))][j - 1]);
-		        }
-		    }
-		}
-		
-		bool check(int x) {
-		    int i, j;
-		    int kk = k - 1;
-		    int y = (int)log2(kk);
-		    cout << "check " << x << endl;
-		    cout << kk << " " << y << endl;
-		    for(i = 1; i + kk - 1<= n; i++) {
-		        cout << i << " " << i + kk - (1<<y) << endl;
-		        if(min(st[i][y], st[i + kk - (1<<y)][y]) >= x) return true;
-		    }
-		    return false;
-		}
+		char str[Maxn];
 		
 		int main() {
 		    int i, j, u, v, w;
 		    //freopen("", "r", stdin);
 		    //freopen("", "w", stdout);
-		    while(scanf("%d%d", &n, &k) != EOF) {
-		        g.clear();
-		        for(i = 0; i < n; i++) {
-		            scanf("%d", &num[i]);
-		            g.PB(num[i]);
-		        }
-		        SORT(g);
-		        g.erase(unique(g.BG, g.ED), g.ED);
-		        for(i = 0; i < g.SZ; i++) mp[g[i]] = i + 1;
-		        for(i = 0; i < n; i++) num[i] = mp[num[i]];
+		    while(scanf("%d", &k) != EOF && k) {
+		        n = 0;
+		        scanf("%s", str);
+		        for(i = 0; str[i]; i++) num[i] = str[i];
+		        n = w = i;
+		        num[n++] = '$';
+		        scanf("%s", str);
+		        for(i = 0; str[i]; i++) num[i + n] = str[i];
+		        n += i;
 		        num[n] = 0;
-		        da(num, n + 1, g.SZ + 10);
-		        pre();
-		        int ans = 1;
-		        int l = 2, r = n, mid;
-		        while(l + 1 < r) {
-		            mid = (l + r) >> 1;
-		            if(check(mid)) l = mid;
-		            else r = mid - 1;
+		        da(num, n + 1, 300);
+		        for(i = 0; i <= n; i++) {
+		            cout << i << ":";
+		            for(j = sa[i]; j <= n; j++) cout << (char)num[j]; cout << endl;
 		        }
-		        if(check(r)) ans = r;
-		        else if(check(l)) ans = l;
-		        printf("%d\n", ans);
+		        LL ans = 0, a, b;
+		        for(i = 2; i <= n; ) {
+		            if(height[i] >= k && (sa[i - 1] != w && sa[i] != w) ) {
+		                for(j = i + 1; j <= n && height[j] >= k; j++);
+		                for(u = i - 1, a = 0, b = 0; u < j; u++) {
+		                    if(sa[u] < w) a++;
+		                    else b++;
+		                }
+		                cout << i - 1 << " " << j - 1 << " " << a << " " << b << endl;
+		                ans += a * b;
+		                i = j;
+		            }
+		            else i++;
+		        }
+		        cout << ans << endl;
 		    }
 		    return 0;
 		}
