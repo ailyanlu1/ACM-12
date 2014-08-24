@@ -1,4 +1,4 @@
-s##  Graph Template
+##  Graph Template
 
 ******  
 ### **Contents** 
