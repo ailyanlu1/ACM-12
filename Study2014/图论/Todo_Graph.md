@@ -716,7 +716,7 @@ s##  Graph Template
 		}
 
 	**“有提交就会有奇迹”的dinic**  
-	dinic是有技巧的，以下是我喜欢的19行版dinic  
+	dinic是有技巧的，以下是我喜欢的19行版dinic (by 雁过留声) 
 
 		//这是数组以及结构定义，不计算行数
 		int level[NMax+2],queue[NMax+2];
@@ -766,12 +766,12 @@ s##  Graph Template
 		    int i, j, u, v, det;
 		    int maxflow = 0;
 		    memset(dist, 0, sizeof(dist[0]) * (n + 3));
-		    memset(cur, 0, sizeof(cur[0]) * (n + 3));
 		    memset(gap, 0, sizeof(gap[0]) * (n + 3));
 		    for (i = 0; i < n; i ++ )
 		        cur[i] = last[i];
 		    u = s;
 		    gap[0] = n;
+			pre[s] = -1;
 		    while (dist[s] <= n) {
 		        bool flag = false;
 		        for (j = cur[u]; j != -1; j = e[j].next) {
