@@ -138,6 +138,9 @@
             int flow = dinic(S, T, T + 1);
             if(flow != sums) flag = false;
         }
+        
+*	混合欧拉回路输出路径 
+
 
 ####    04.	**哈密尔顿回路**
 
