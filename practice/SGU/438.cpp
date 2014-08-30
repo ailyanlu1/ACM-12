@@ -36,76 +36,95 @@ const double eps = 1e-8;
 const LL MOD = 1000000007;
 const LL USE = 20000;
 const LL INF = 0x3f3f3f3f;
-#define Maxn 11111
-#define Maxm 611111
+#define Maxn 111
+#define Maxm 61111
 struct node {
-    int u, v, c, next;
-}e[Maxm];
+    int u, v, c, w, next;
+} e[Maxm];
 int tot, last[Maxn];
-int cur[Maxn], dist[Maxn], que[Maxn], sta[Maxn], head, tail, top;
+int dist[Maxn], pre[Maxn];
+int man, prev, mincost, maxflow;
+bool visit[Maxn];
+queue<int> Q;
+#define MOD 0x3f3f3f3f
 
-void adde(int u, int v, int c, int c1) {
-//    cout << "adde " << u << "->" << v << " " << c << endl;
-    e[tot].u = u; e[tot].v = v; e[tot].c = c; e[tot].next = last[u]; last[u] = tot++;
-    e[tot].u = v; e[tot].v = u; e[tot].c = c1; e[tot].next = last[v]; last[v] = tot++;
+void adde (int u, int v, int c, int w) {
+    e[tot].u = u; e[tot].v = v; e[tot].c = c; e[tot].w = w; e[tot].next = last[u]; last[u] = tot++;
+    e[tot].u = v; e[tot].v = u; e[tot].c = 0; e[tot].w = -w; e[tot].next = last[v]; last[v] = tot++;
 }
 
-bool bfs(int s, int t, int n) {
-    int i, j, u, v;
-    for(i = 0; i < n; i++) dist[i] = MOD;
+bool spfa (int s, int t, int n) {
+    memset (dist, 0x3f, sizeof (dist[0]) * (n + 3) );
+    memset (visit, 0, sizeof (visit[0]) * (n + 3) );
+    memset (pre, -1, sizeof (pre[0]) * (n + 3) );
+    while (!Q.empty() ) Q.pop();
+    Q.push (s);
+    visit[s] = true;
     dist[s] = 0;
-    head = tail = 0;
-    que[tail++] = s;
-    while(head < tail) {
-        u = que[head++];
-        for(j = last[u]; j != -1; j = e[j].next) {
-            if(e[j].c == 0) continue;
-            v = e[j].v;
-            if(dist[v] > dist[u] + 1) {
-                dist[v] = dist[u] + 1;
-                if(v == t) return true;
-                que[tail++] = v;
+    pre[s] = -1;
+    while (!Q.empty() ) {
+        int u = Q.front();
+        visit[u] =false;
+        Q.pop();
+        for (int j = last[u]; j != -1; j = e[j].next)
+            if (e[j].c > 0 && dist[u] + e[j].w < dist[e[j].v]) {
+                dist[e[j].v] = dist[u] + e[j].w;
+                pre[e[j].v] = j;
+                if (!visit[e[j].v]) {
+                    Q.push (e[j].v);
+                    visit[e[j].v] = true;
+                }
             }
-        }
     }
-    return false;
+    if (dist[t] == MOD) return false;
+    else return true;
 }
 
-int dinic(int s, int t, int n) {
-    int i, j, u, v;
-    int maxflow = 0;
-    while(bfs(s, t, n)) {
-        for(i = 0; i < n; i++) cur[i] = last[i];
-        u = s; top = 0;
-        while(cur[s] != -1) {
-            if(u == t) {
-                int tp = MOD;
-                for(i = top - 1; i >= 0; i--) {
-                    tp = min(tp, e[sta[i]].c);
-                }
-                maxflow += tp;
-                for(i = top - 1; i >= 0; i--) {
-                    e[sta[i]].c -= tp;
-                    e[sta[i] ^ 1].c += tp;
-                    if(e[sta[i]].c == 0) top = i;
-                }
-                u = e[sta[top]].u;
-            }
-            else if(cur[u] != -1 && e[cur[u]].c > 0 && dist[u] + 1 == dist[e[cur[u]].v]) {
-                sta[top++] = cur[u];
-                u = e[cur[u]].v;
-            }
-            else {
-                while(u != s && cur[u] == -1) {
-                    u = e[sta[--top]].u;
-                }
-                cur[u] = e[cur[u]].next;
-            }
-        }
+int ChangeFlow (int t) {
+    int det = MOD, u = t;
+    while (~pre[u]) {
+        u = pre[u];
+        det = min (det, e[u].c);
+        u = e[u].u;
     }
-    return maxflow;
+    u = t;
+    while (~pre[u]) {
+        u = pre[u];
+        e[u].c -= det;
+        e[u ^ 1].c += det;
+        u = e[u].u;
+    }
+    return det;
 }
+
 int x[100], y[100], f[55][55], C[100], mp[55][55], n, c, D, W, m;
+int MinCostFlow (int s, int t, int n) {
+    mincost = maxflow = prev = man = 0;
+    int tp;
+    while (spfa (s, t, n) ) {
+        int det = ChangeFlow (t);
+        tp = man + (dist[t] - prev) * maxflow + det;
+//        cout << tp << " " << prev << " " << dist[t] << " det " << det << endl;
+        if(tp >= c) {
+            for(int j = prev + 1; j <= dist[t]; j++) {
+                tp = man + (j - prev) * maxflow;
+                if(tp >= c) {
+                    return prev = j;
+                }
+            }
+            return prev = dist[t];
+        }
+        man = tp;
+        prev = dist[t];
+        mincost += det * dist[t];
+        maxflow += det;
+    }
+//    cout << "flow " << maxflow << " prev " << prev << " man " << man << endl;
+    if(maxflow > 0) {
+        return (prev + (c - man) / maxflow + ((c - man) % maxflow != 0 ? 1 : 0));
+    }
+    else return -1;
+}
 int main() {
     int i, j, k, u, v, w;
     //freopen("", "r", stdin);
@@ -128,50 +147,33 @@ int main() {
                 if(d <= SQ(D)) f[i][j] = 1, mp[i][j] = 1;
             }
             f[i][i] = 0;
-            if(y[i] <= D) f[n + 1][i] = 1;
-            if(W - y[i] <= D) f[i][n + 2] = 1;
-        }
-        m = n + 2;
-        for(k = 1; k <= m; k++) {
-            for(i = 1; i <= m; i++) {
-                for(j = 1; j <= m; j++) {
-                    cmin(f[i][j], f[i][k] + f[k][j]);
-                }
-            }
+            if(y[i] <= D) mp[n + 1][i] = f[n + 1][i] = 1;
+            if(W - y[i] <= D) mp[i][n + 2] = f[i][n + 2] = 1;
         }
 //        for(i = 1; i <= m; i++) {
 //            for(j = 1; j <= m; j++) printf("%8d ", f[i][j]); printf("\n");
 //        }
-        int N = 1, S = 0, T = 1;
-        int cur = 0;
-        last[0] = last[1] = -1;
+        int N = 2 * n + 3, S = 0, T = 2 * n + 1, SS = T + 1, TT = SS + 1;
+        for(i = 0; i <= N; i++) last[i] = -1;
         tot = 0;
-        for(k = 1; k <= n + m + 1; k++) {
-            int nn = 2 * n;
-            for(i = 1; i <= nn; i++) last[i + N] = -1;
-            for(i = 1; i <= n; i++) {
-                u = i + N; v = i + n + N;
-                adde(u, v, C[i], 0);
-                if(f[n + 1][i] == 1) adde(S, u, MOD, 0);
-                if(f[i][n + 2] == 1) adde(v, T, MOD, 0);
-            }
-            if(k > 1) {
-                for(i = 1; i <= n; i++) {
-                    for(j = 1; j <= n; j++) {
-                        if(mp[i][j]) adde(i + n + N - nn, j + N, MOD, 0);
-                    }
+        for(i = 1; i <= n; i++) {
+            if(mp[n + 1][i]) adde(S, i, MOD, 1);
+            if(mp[i][n + 2]) adde(i + n, T, MOD, 1);
+            adde(i, i + n, C[i], 0);
+        }
+        for(i = 1; i <= n; i++) {
+            for(j = 1; j <= n; j++) {
+                if(mp[i][j]) {
+                    adde(i + n, j, MOD, 1);
                 }
             }
-            N += nn;
-            int flow = dinic(S, T, N + 1);
-            cur += flow;
-//            cout << cur << " " << flow << endl;
-            if(cur >= c) break;
         }
-        if(cur >= c) 
-            printf("%d\n", k+1);
+        int ti = MinCostFlow(S, T, N);
+        if(ti != -1) 
+            printf("%d\n", ti);
         else printf("IMPOSSIBLE\n");
     }
     return 0;
 }
+
 
