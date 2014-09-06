@@ -64,15 +64,21 @@ typedef deque<PLL> DQLL;
 typedef set<PLL> SLL;
 #define Maxn 111111
 #define Maxm 111111
-class PerfectPermutation
+class PotentialGeometricSequence
 {
 public:
     int n, m;
-    int reorder (vector <int> P)
+    int numberOfSubsequences (vector <int> d)
     {
-        int ret = 0;
+        n = d.SZ;
+        int ret = n + n - 1;
         int i, j, u, v, w;
-        
+        for(i = 0; i < n; i++) {
+            for(j = i + 2; j < n; j++) {
+                if(d[j] - d[j - 1] != d[i + 1] - d[i]) break;
+                else ret++;
+            }
+        }
         return int(ret);
     }
 };
@@ -155,70 +161,70 @@ namespace moj_harness {
 	int run_test_case(int casenum__) {
 		switch (casenum__) {
 		case 0: {
-			int P[]                   = {2, 0, 1};
-			int expected__            = 0;
+			int d[]                   = {0,1,2};
+			int expected__            = 6;
 
 			std::clock_t start__      = std::clock();
-			int received__            = PerfectPermutation().reorder(vector <int>(P, P + (sizeof P / sizeof P[0])));
+			int received__            = PotentialGeometricSequence().numberOfSubsequences(vector <int>(d, d + (sizeof d / sizeof d[0])));
 			return verify_case(casenum__, expected__, received__, clock()-start__);
 		}
 		case 1: {
-			int P[]                   = {2, 0, 1, 4, 3};
-			int expected__            = 2;
-
-			std::clock_t start__      = std::clock();
-			int received__            = PerfectPermutation().reorder(vector <int>(P, P + (sizeof P / sizeof P[0])));
-			return verify_case(casenum__, expected__, received__, clock()-start__);
-		}
-		case 2: {
-			int P[]                   = {2, 3, 0, 1};
-			int expected__            = 2;
-
-			std::clock_t start__      = std::clock();
-			int received__            = PerfectPermutation().reorder(vector <int>(P, P + (sizeof P / sizeof P[0])));
-			return verify_case(casenum__, expected__, received__, clock()-start__);
-		}
-		case 3: {
-			int P[]                   = {0, 5, 3, 2, 1, 4};
-			int expected__            = 3;
-
-			std::clock_t start__      = std::clock();
-			int received__            = PerfectPermutation().reorder(vector <int>(P, P + (sizeof P / sizeof P[0])));
-			return verify_case(casenum__, expected__, received__, clock()-start__);
-		}
-		case 4: {
-			int P[]                   = {4, 2, 6, 0, 3, 5, 9, 7, 8, 1};
+			int d[]                   = {1,2,4};
 			int expected__            = 5;
 
 			std::clock_t start__      = std::clock();
-			int received__            = PerfectPermutation().reorder(vector <int>(P, P + (sizeof P / sizeof P[0])));
+			int received__            = PotentialGeometricSequence().numberOfSubsequences(vector <int>(d, d + (sizeof d / sizeof d[0])));
+			return verify_case(casenum__, expected__, received__, clock()-start__);
+		}
+		case 2: {
+			int d[]                   = {3,2,1,0};
+			int expected__            = 10;
+
+			std::clock_t start__      = std::clock();
+			int received__            = PotentialGeometricSequence().numberOfSubsequences(vector <int>(d, d + (sizeof d / sizeof d[0])));
+			return verify_case(casenum__, expected__, received__, clock()-start__);
+		}
+		case 3: {
+			int d[]                   = {1,2,4,8,16};
+			int expected__            = 9;
+
+			std::clock_t start__      = std::clock();
+			int received__            = PotentialGeometricSequence().numberOfSubsequences(vector <int>(d, d + (sizeof d / sizeof d[0])));
+			return verify_case(casenum__, expected__, received__, clock()-start__);
+		}
+		case 4: {
+			int d[]                   = {1,3,5,5,5,5,64,4,23,2,3,4,5,4,3};
+			int expected__            = 37;
+
+			std::clock_t start__      = std::clock();
+			int received__            = PotentialGeometricSequence().numberOfSubsequences(vector <int>(d, d + (sizeof d / sizeof d[0])));
 			return verify_case(casenum__, expected__, received__, clock()-start__);
 		}
 
 		// custom cases
 
-/*      case 5: {
-			int P[]                   = ;
-			int expected__            = ;
+      case 5: {
+			int d[]                   = {2,5,8,11,14};
+			int expected__            = 6;
 
 			std::clock_t start__      = std::clock();
-			int received__            = PerfectPermutation().reorder(vector <int>(P, P + (sizeof P / sizeof P[0])));
+			int received__            = PotentialGeometricSequence().numberOfSubsequences(vector <int>(d, d + (sizeof d / sizeof d[0])));
 			return verify_case(casenum__, expected__, received__, clock()-start__);
-		}*/
+		}
 /*      case 6: {
-			int P[]                   = ;
+			int d[]                   = ;
 			int expected__            = ;
 
 			std::clock_t start__      = std::clock();
-			int received__            = PerfectPermutation().reorder(vector <int>(P, P + (sizeof P / sizeof P[0])));
+			int received__            = PotentialGeometricSequence().numberOfSubsequences(vector <int>(d, d + (sizeof d / sizeof d[0])));
 			return verify_case(casenum__, expected__, received__, clock()-start__);
 		}*/
 /*      case 7: {
-			int P[]                   = ;
+			int d[]                   = ;
 			int expected__            = ;
 
 			std::clock_t start__      = std::clock();
-			int received__            = PerfectPermutation().reorder(vector <int>(P, P + (sizeof P / sizeof P[0])));
+			int received__            = PotentialGeometricSequence().numberOfSubsequences(vector <int>(d, d + (sizeof d / sizeof d[0])));
 			return verify_case(casenum__, expected__, received__, clock()-start__);
 		}*/
 		default:
