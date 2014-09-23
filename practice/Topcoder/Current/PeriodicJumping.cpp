@@ -42,6 +42,8 @@ using namespace std;
 #define SQ(x) ((x)*(x))
 #define SORT(p) sort(p.BGN,p.ED)
 #define MEM(a, b) memset(a, (b), sizeof(a))
+#define cmax(x,y) x=max(x,y)
+#define cmin(x,y) x=min(x,y)
 typedef pair<int, int> PII;
 typedef vector<int> VI;
 typedef queue<int> QI;
@@ -64,22 +66,55 @@ typedef deque<PLL> DQLL;
 typedef set<PLL> SLL;
 #define Maxn 111111
 #define Maxm 111111
-class PotentialGeometricSequence
+const LL MOD = 2000000007LL;
+LL sum[100];
+class PeriodicJumping
 {
 public:
     int n, m;
-    int numberOfSubsequences (vector <int> d)
+    int minimalTime (int x, vector <int> jp)
     {
-        n = d.SZ;
-        int ret = n + n - 1;
-        int i, j, u, v, w;
+        n = jp.SZ;
+        x = abs(x);
+        if(x == 0) return 0;
+        if(n == 1) {
+            if(x == jp[0]) return 1;
+            if(x < jp[0]) return 2;
+            return x / jp[0] + (x % jp[0] == 0? 0: 1);
+        }
+        int ret = 0;
+        LL cur = 0;
+        int i, j, u, v, w, q;
+        LL dmax = 0, pp = 0;
         for(i = 0; i < n; i++) {
-            for(j = i + 2; j < n; j++) {
-                if(d[j] - d[j - 1] != d[i + 1] - d[i]) break;
-                else ret++;
+            sum[i + 1] = sum[i] + jp[i];
+            cmax(dmax, (LL)jp[i]);
+            if(sum[i + 1] == x) return i + 1;
+            if(sum[i + 1] > x) {
+                if(sum[i + 1] - dmax >= dmax) return i + 1;
+                else if(x >= 2 * dmax - sum[i + 1]) return i + 1;
             }
         }
-        return int(ret);
+        for(i = n + 1; i <= 2 * n; i++) {
+            if(sum[n] + sum[i - n] == x) return i;
+            if(sum[n] + sum[i - n] > x) {
+                if(sum[n] + sum[i - n] - dmax >= dmax) return i;
+                else if(x >= 2 * dmax - sum[n] - sum[i - n]) return i;
+            }
+        }
+        int l = 0, r = MOD, mid;
+        while(l + 1 < r) {
+            mid = (l + r) >> 1;
+            cur = mid / n * sum[n] + sum[mid % n];
+            if(cur == x) return mid;
+            if(cur < x)l = mid + 1;
+            else r = mid;
+        }
+        cur = l / n * sum[n] + sum[l % n];
+        if(cur >= x) return l;
+        cur = r / n * sum[n] + sum[r % n];
+        if(cur >= x) return r;
+        return r + 1;
     }
 };
  
@@ -161,70 +196,87 @@ namespace moj_harness {
 	int run_test_case(int casenum__) {
 		switch (casenum__) {
 		case 0: {
-			int d[]                   = {0,1,2};
-			int expected__            = 6;
-
-			std::clock_t start__      = std::clock();
-			int received__            = PotentialGeometricSequence().numberOfSubsequences(vector <int>(d, d + (sizeof d / sizeof d[0])));
-			return verify_case(casenum__, expected__, received__, clock()-start__);
-		}
-		case 1: {
-			int d[]                   = {1,2,4};
+			int x                     = 15;
+			int jumpLengths[]         = {1,2,3,4,5,6,7,8,9,10};
 			int expected__            = 5;
 
 			std::clock_t start__      = std::clock();
-			int received__            = PotentialGeometricSequence().numberOfSubsequences(vector <int>(d, d + (sizeof d / sizeof d[0])));
+			int received__            = PeriodicJumping().minimalTime(x, vector <int>(jumpLengths, jumpLengths + (sizeof jumpLengths / sizeof jumpLengths[0])));
+			return verify_case(casenum__, expected__, received__, clock()-start__);
+		}
+		case 1: {
+			int x                     = 5;
+			int jumpLengths[]         = {5};
+			int expected__            = 1;
+
+			std::clock_t start__      = std::clock();
+			int received__            = PeriodicJumping().minimalTime(x, vector <int>(jumpLengths, jumpLengths + (sizeof jumpLengths / sizeof jumpLengths[0])));
 			return verify_case(casenum__, expected__, received__, clock()-start__);
 		}
 		case 2: {
-			int d[]                   = {3,2,1,0};
-			int expected__            = 10;
+			int x                     = 1;
+			int jumpLengths[]         = {10};
+			int expected__            = 2;
 
 			std::clock_t start__      = std::clock();
-			int received__            = PotentialGeometricSequence().numberOfSubsequences(vector <int>(d, d + (sizeof d / sizeof d[0])));
+			int received__            = PeriodicJumping().minimalTime(x, vector <int>(jumpLengths, jumpLengths + (sizeof jumpLengths / sizeof jumpLengths[0])));
 			return verify_case(casenum__, expected__, received__, clock()-start__);
 		}
 		case 3: {
-			int d[]                   = {1,2,4,8,16};
-			int expected__            = 9;
+			int x                     = -10;
+			int jumpLengths[]         = {2,3,4,500,6,7,8};
+			int expected__            = 11;
 
 			std::clock_t start__      = std::clock();
-			int received__            = PotentialGeometricSequence().numberOfSubsequences(vector <int>(d, d + (sizeof d / sizeof d[0])));
+			int received__            = PeriodicJumping().minimalTime(x, vector <int>(jumpLengths, jumpLengths + (sizeof jumpLengths / sizeof jumpLengths[0])));
 			return verify_case(casenum__, expected__, received__, clock()-start__);
 		}
 		case 4: {
-			int d[]                   = {1,3,5,5,5,5,64,4,23,2,3,4,5,4,3};
-			int expected__            = 37;
+			int x                     = -1000000000;
+			int jumpLengths[]         = {1};
+			int expected__            = 1000000000;
 
 			std::clock_t start__      = std::clock();
-			int received__            = PotentialGeometricSequence().numberOfSubsequences(vector <int>(d, d + (sizeof d / sizeof d[0])));
+			int received__            = PeriodicJumping().minimalTime(x, vector <int>(jumpLengths, jumpLengths + (sizeof jumpLengths / sizeof jumpLengths[0])));
+			return verify_case(casenum__, expected__, received__, clock()-start__);
+		}
+		case 5: {
+			int x                     = 0;
+			int jumpLengths[]         = {19911120};
+			int expected__            = 0;
+
+			std::clock_t start__      = std::clock();
+			int received__            = PeriodicJumping().minimalTime(x, vector <int>(jumpLengths, jumpLengths + (sizeof jumpLengths / sizeof jumpLengths[0])));
 			return verify_case(casenum__, expected__, received__, clock()-start__);
 		}
 
 		// custom cases
 
-      case 5: {
-			int d[]                   = {2,5,8,11,14};
-			int expected__            = 6;
+      case 6: {
+			int x                     = 1;
+			int jumpLengths[]         = {2, 4, 8 , 16, 32, 64, 128, 256, 512, 1024};
+			int expected__            = 11;
 
 			std::clock_t start__      = std::clock();
-			int received__            = PotentialGeometricSequence().numberOfSubsequences(vector <int>(d, d + (sizeof d / sizeof d[0])));
+			int received__            = PeriodicJumping().minimalTime(x, vector <int>(jumpLengths, jumpLengths + (sizeof jumpLengths / sizeof jumpLengths[0])));
 			return verify_case(casenum__, expected__, received__, clock()-start__);
 		}
-/*      case 6: {
-			int d[]                   = ;
-			int expected__            = ;
+      case 7: {
+			int x                     = -6;
+			int jumpLengths[]         = {24, 3, 5, 37, 51, 36, 26, 29, 65, 27, 66, 76, 5, 65, 74, 59, 25, 22};
+			int expected__            = 4;
 
 			std::clock_t start__      = std::clock();
-			int received__            = PotentialGeometricSequence().numberOfSubsequences(vector <int>(d, d + (sizeof d / sizeof d[0])));
+			int received__            = PeriodicJumping().minimalTime(x, vector <int>(jumpLengths, jumpLengths + (sizeof jumpLengths / sizeof jumpLengths[0])));
 			return verify_case(casenum__, expected__, received__, clock()-start__);
-		}*/
-/*      case 7: {
-			int d[]                   = ;
+		}
+/*      case 8: {
+			int x                     = ;
+			int jumpLengths[]         = ;
 			int expected__            = ;
 
 			std::clock_t start__      = std::clock();
-			int received__            = PotentialGeometricSequence().numberOfSubsequences(vector <int>(d, d + (sizeof d / sizeof d[0])));
+			int received__            = PeriodicJumping().minimalTime(x, vector <int>(jumpLengths, jumpLengths + (sizeof jumpLengths / sizeof jumpLengths[0])));
 			return verify_case(casenum__, expected__, received__, clock()-start__);
 		}*/
 		default:

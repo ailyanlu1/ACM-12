@@ -20,13 +20,13 @@
 15. **网络流拓展**  
 16. **并查集**  
 17. *最小树形图(有向图的最小生成树)*  
-18. **树的同构**  
+18. **树的Hash与同构**  
 19. **差分约束**  
 20. **分数规划**  
 21. **偏序集** 
 22. **最大团**  
 23. **斯坦纳树**  
-24. **图的hash**  
+24. **图的hash与同构**  
 25. **弦图完美消除序列**  
 26. **Other**  
 27. **待解决的问题**  
@@ -39,13 +39,134 @@
 
 *	Kruskal  
 
+*	Borůvka算法
+
 *	次小生成树  
+
+*	最小瓶颈生成树
+
+*	直径最短生成树
+
+*	度数最多的点, 度数最少的生成树
+
+*	两点之间路径, 权重总和最小的生成树
+
+*	有两种权重, 权重比值最小的生成树(最优比例生成树)
+
+*	边不重叠, 权重最小的k棵树
+
+*	重叠边增加额外权重, 权重最小的k棵树
+
+*	权重最小的生成子树, 刚好k个点
+
+*	权重最小的生成子树, 刚好是给定的K个点
 
 *   度限制最小生成树  
 
 *   动态最小生成树  
 
+*	有向图最小生成树(最小树形图)
 
+*	任意两点间路径的瓶颈, 形成两点间最小割的无向生成树
+
+*	dfs树
+
+*	bfs树
+
+*	最短路径树
+
+*	生成树计数
+
+	Matrix-Tree定理(Kirchhoff矩阵-树定理)   
+	Kirchhoff矩阵C[G]=D[G]-A[G] (度数矩阵-邻接矩阵)  
+	求C[G]任意一个n-1阶主子式的行列式(取出第i行和第i列)
+		
+		//spoj 104 Highways
+		//朴素求解, ans是double用printf("%0.0f\n",ans)输出成int
+		//返回是否有解,若有解ans*=a[i][i]中
+		#define eps 1e-10
+		#define fabs(x) ((x)>eps?(x):-(x))
+		#define ZERO(x) (fabs(x) > eps ? 0 : 1)
+		int gauss_tpivot (int n, double a[][Maxn]) {
+		    int i, j, k, p;
+		    double maxp, t;
+		    for (k = 0; k < n; k++) {
+		        if(ZERO(a[k][k])) {
+		            for(i = k + 1; i < n; i++) if(!ZERO(a[i][i])) break;
+		            if(i >= n) return 0;
+		            for(j = k; j < n; j++) {
+		                swap(a[k][j], a[i][j]);
+		            }
+		        }
+		        maxp = a[k][k];
+		        for (j = k + 1; j < n; j++) {
+		            a[k][j] /= maxp;
+		            for (i = k + 1; i < n; i++)
+		                a[i][j] -= a[i][k] * a[k][j];
+		        }
+		    }
+		    return 1;
+		}
+		
+		int main() {
+	        for(i = 0; i <= n; i++) {
+	            for(j = 0; j <= n; j++) {
+	                a[i][j] = b[i][j] = 0;
+	            }
+	        }
+	        for(i = 0; i < m; i++) {
+	            scanf("%d%d", &u, &v);
+	            if(u == v) continue;
+	            u--; v--;
+	            a[u][u]++; a[v][v]++;
+	            b[u][v] = b[v][u] = 1;
+	        }
+	        for(i = 0; i < n; i++) {
+	            for(j = 0; j < n; j++) {
+	                a[i][j] = a[i][j] - b[i][j];
+	            }
+	        }
+	        double ans = 0;
+	        if(gauss_tpivot(n - 1, a)) {
+	            ans = 1;
+	            for(i = 0; i < n - 1; i++) ans *= a[i][i];
+	        }
+	        else ans = 0;
+	        printf("%0.0f\n", ans);
+		}
+
+		//hdu 4305 MOD = 10007
+		//答案取模, 每一步需要取模处理
+		LL gauss_tpivot (int n, LL a[][Maxn]) {
+		    LL ret = 1;
+		    int i, j, k;
+		    LL p , q;
+		    tot = 0;
+		    for (k = 0; k < n; k++) {
+		        if(!a[k][k]) {
+		            for(i = k + 1; i < n; i++) if(a[i][k]) break;
+		            if(i >= n) return 0;
+		            for(j = k; j < n; j++) {
+		                swap(a[k][j], a[i][j]);
+		            }
+		            ret *= -1;
+		        }
+		        if(a[k][k] < 0) {
+		            for(j = 0; j < n; j++) a[k][j] *= -1;
+		        }
+		        p = a[k][k];
+		        ret = ret * p % MOD;
+		        for(i = k + 1; i < n; i++) {
+		            q = a[i][k] * inv[a[k][k]] % MOD;
+		            for(j = k + 1; j < n; j++) {
+		                a[i][j] = (a[i][j] - a[k][j] * q) % MOD;
+		                if(a[i][j] < 0) a[i][j] += MOD;
+		            }
+		        }
+		    }
+		    return ret % MOD;
+		}
+		
 ####    02.	*最短路*  
 
 *	floyd  
@@ -76,6 +197,10 @@
 	MPS算法
 
 	最短路树+回溯
+
+	带环K短路
+
+	无环K短路
 	
 	不重复k短路
 		
@@ -344,8 +469,71 @@
 
 *	倍增算法
 
-	* 	增加对0点的支持(f[][]数组初始值等问题
-	* 	记得验题
+	验题: POJ1330,     
+
+		//LCA O(nlogn)
+		//加边之前使用initLCA()初始化数组
+		//调用solveLCA()初始化LCA
+		//调用getLCA(x,y)返回x和y的LCA
+		struct node {
+		    int u, v, l, next;
+		}e[Maxm];
+		int tot, last[Maxn];
+		void adde(int u, int v) {
+		    e[tot].u = u; e[tot].v = v;
+		    e[tot].next = last[u]; last[u] = tot++;
+		}
+		int depth[Maxn], fa[16][Maxn];
+		int n, m;
+		void initLCA() {
+		    int i, j;
+		    for(i = 0; i <= n; i++) {
+		        depth[i] = -1;
+		        last[i] = -1;
+		        for(j = 0; j < 16; j++) fa[j][i] = -1;
+		    }
+		    tot = 0;
+		}
+		void dfsLCA(int u) {
+		    int j, v;
+		    for(j = last[u]; j != -1; j = e[j].next) {
+		        v = e[j].v;
+		        if(depth[v] == -1) {
+		            fa[0][v] = u;
+		            depth[v] = depth[u] + 1;
+		            dfsLCA(v);
+		        }
+		    }
+		}
+		
+		int getLCA (int x, int y) {
+		    int i, dif = abs(depth[x] - depth[y]);
+		    if (depth[x] < depth[y]) swap(x, y);
+		    for (i = 20 - 1; i >= 0; i--) {
+		        if ((1 << i) & dif) {
+		            dif -= (1 << i);
+		            x = fa[i][x];
+		        }
+		    }
+		    for (i = 16 - 1; i >= 0; i--) {
+		        if (fa[i][x] != fa[i][y]) {
+		            x = fa[i][x];
+		            y = fa[i][y];
+		        }
+		    }
+		    if (x == y) return x;
+		    else return fa[0][x];
+		}
+		
+		void solveLCA() {
+		    int i, j, root = 1;
+		    fa[0][root] = 1;
+		    depth[root] = 0;
+		    dfsLCA(root);
+		    for (i = 1; i < 16; i++)
+		        for(j = 0; j <= n; j++)
+		            fa[i][j] = fa[i-1][fa[i-1][j]];
+		}
 
 *	Tarjan
 
