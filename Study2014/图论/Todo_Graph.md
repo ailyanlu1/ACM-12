@@ -463,7 +463,19 @@
 
 *	关键路径
 
-*	
+	求关键路径：
+
+		1. 关键节点：
+		        正向拓扑序， 求每个点最早到达时间early[i] = max(early[i], early[j] + edge[k]);
+		        利用汇点的early值，反向拓扑求每个点迟到达时间late[i] = min(late[i], late[j] - edge[k]);
+		        关键节点early == late
+		        PS：
+		                最早开始时间可以理解为是必须等到之前的任务完成才能做
+		                最迟开始时间可以理解为是必须为后面的任务留出足够的时间
+		              
+		2. 关键路径 ：
+		        源点到汇点的最长路（可能有多条）
+
 
 ####    08.  **LCA**  
 
@@ -536,6 +548,76 @@
 		}
 
 *	Tarjan
+
+	验题: HDU2586
+
+		//Tarjan离线LCA
+		//e存放树边
+		//q存放query
+		struct node {
+		    int u, v, n, next;
+		};
+		struct GRAPH {
+		    node e[Maxm];
+		    int tot, last[Maxn];
+		    void init(int n) {
+		        for(int i = 0; i <= n; i++) last[i] = -1;
+		        tot = 0;
+		    }
+		    void adde(int u, int v, int n) {
+		        e[tot].u = u; e[tot].v = v; e[tot].n = n;
+		        e[tot].next = last[u]; last[u] = tot++;
+		        e[tot].u = v; e[tot].v = u; e[tot].n = n;
+		        e[tot].next = last[v]; last[v] = tot++;
+		    }
+		}e, q;
+		int fa[Maxn], lca[Maxn], ans[Maxn];
+		int visit[Maxn];
+		int getfa(int x) {
+		    if(x == fa[x]) return x;
+		    else return (fa[x] = getfa(fa[x]));
+		}
+		
+		void tarjanLCA(int u) {
+		    int i, j, v, f;
+		    fa[u] = u;
+		    visit[u] = 1;
+		    for(j = e.last[u]; j != -1; j = e.e[j].next) {
+		        v = e.e[j].v;
+		        if(!visit[v]) {
+		            tarjanLCA(v);
+		            fa[v] = u;
+		        }
+		    }
+		    for(j = q.last[u]; j != -1; j = q.e[j].next) {
+		        v = q.e[j].v;
+		        if(visit[v]) {
+		            lca[q.e[j].n] = f = getfa(v);
+		        }
+		    }
+		}
+
+*	LCA 转 RMQ
+
+			0:			(1)
+				    	/ \
+			1:		 (2)   (7)
+				     / \     \
+			2:	   (3) (4)   (8)
+				      /   \
+			3:	    (5)   (6)
+
+	step 1: dfs遍历树, 依次记录每次到达的点, 以及每个点的深度得到序列:
+
+		结点访问顺序是: 1 2 3 2 4 5 4 6 4 2 1 7 8 7 1 //共2n-1个值
+		结点对应深度是: 0 1 2 1 2 3 2 3 2 1 0 1 2 1 0
+
+	step 2: 利用ST计算任意区间最小深度的点的ID
+
+	step 3: 对于每次查询, 查询u第一次出现位置到v第一次出现位置区间的最小值
+
+*	
+
 
 
 ####    09.  **连通性**  
