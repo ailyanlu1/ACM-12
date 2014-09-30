@@ -20,13 +20,13 @@
 15. **网络流拓展**  
 16. **并查集**  
 17. *最小树形图(有向图的最小生成树)*  
-18. **树的同构**  
+18. **树的Hash与同构**  
 19. **差分约束**  
 20. **分数规划**  
 21. **偏序集** 
 22. **最大团**  
 23. **斯坦纳树**  
-24. **图的hash**  
+24. **图的hash与同构**  
 25. **弦图完美消除序列**  
 26. **Other**  
 27. **待解决的问题**  
@@ -39,13 +39,134 @@
 
 *	Kruskal  
 
+*	Borůvka算法
+
 *	次小生成树  
+
+*	最小瓶颈生成树
+
+*	直径最短生成树
+
+*	度数最多的点, 度数最少的生成树
+
+*	两点之间路径, 权重总和最小的生成树
+
+*	有两种权重, 权重比值最小的生成树(最优比例生成树)
+
+*	边不重叠, 权重最小的k棵树
+
+*	重叠边增加额外权重, 权重最小的k棵树
+
+*	权重最小的生成子树, 刚好k个点
+
+*	权重最小的生成子树, 刚好是给定的K个点
 
 *   度限制最小生成树  
 
 *   动态最小生成树  
 
+*	有向图最小生成树(最小树形图)
 
+*	任意两点间路径的瓶颈, 形成两点间最小割的无向生成树
+
+*	dfs树
+
+*	bfs树
+
+*	最短路径树
+
+*	生成树计数
+
+	Matrix-Tree定理(Kirchhoff矩阵-树定理)   
+	Kirchhoff矩阵C[G]=D[G]-A[G] (度数矩阵-邻接矩阵)  
+	求C[G]任意一个n-1阶主子式的行列式(取出第i行和第i列)
+		
+		//spoj 104 Highways
+		//朴素求解, ans是double用printf("%0.0f\n",ans)输出成int
+		//返回是否有解,若有解ans*=a[i][i]中
+		#define eps 1e-10
+		#define fabs(x) ((x)>eps?(x):-(x))
+		#define ZERO(x) (fabs(x) > eps ? 0 : 1)
+		int gauss_tpivot (int n, double a[][Maxn]) {
+		    int i, j, k, p;
+		    double maxp, t;
+		    for (k = 0; k < n; k++) {
+		        if(ZERO(a[k][k])) {
+		            for(i = k + 1; i < n; i++) if(!ZERO(a[i][i])) break;
+		            if(i >= n) return 0;
+		            for(j = k; j < n; j++) {
+		                swap(a[k][j], a[i][j]);
+		            }
+		        }
+		        maxp = a[k][k];
+		        for (j = k + 1; j < n; j++) {
+		            a[k][j] /= maxp;
+		            for (i = k + 1; i < n; i++)
+		                a[i][j] -= a[i][k] * a[k][j];
+		        }
+		    }
+		    return 1;
+		}
+		
+		int main() {
+	        for(i = 0; i <= n; i++) {
+	            for(j = 0; j <= n; j++) {
+	                a[i][j] = b[i][j] = 0;
+	            }
+	        }
+	        for(i = 0; i < m; i++) {
+	            scanf("%d%d", &u, &v);
+	            if(u == v) continue;
+	            u--; v--;
+	            a[u][u]++; a[v][v]++;
+	            b[u][v] = b[v][u] = 1;
+	        }
+	        for(i = 0; i < n; i++) {
+	            for(j = 0; j < n; j++) {
+	                a[i][j] = a[i][j] - b[i][j];
+	            }
+	        }
+	        double ans = 0;
+	        if(gauss_tpivot(n - 1, a)) {
+	            ans = 1;
+	            for(i = 0; i < n - 1; i++) ans *= a[i][i];
+	        }
+	        else ans = 0;
+	        printf("%0.0f\n", ans);
+		}
+
+		//hdu 4305 MOD = 10007
+		//答案取模, 每一步需要取模处理
+		LL gauss_tpivot (int n, LL a[][Maxn]) {
+		    LL ret = 1;
+		    int i, j, k;
+		    LL p , q;
+		    tot = 0;
+		    for (k = 0; k < n; k++) {
+		        if(!a[k][k]) {
+		            for(i = k + 1; i < n; i++) if(a[i][k]) break;
+		            if(i >= n) return 0;
+		            for(j = k; j < n; j++) {
+		                swap(a[k][j], a[i][j]);
+		            }
+		            ret *= -1;
+		        }
+		        if(a[k][k] < 0) {
+		            for(j = 0; j < n; j++) a[k][j] *= -1;
+		        }
+		        p = a[k][k];
+		        ret = ret * p % MOD;
+		        for(i = k + 1; i < n; i++) {
+		            q = a[i][k] * inv[a[k][k]] % MOD;
+		            for(j = k + 1; j < n; j++) {
+		                a[i][j] = (a[i][j] - a[k][j] * q) % MOD;
+		                if(a[i][j] < 0) a[i][j] += MOD;
+		            }
+		        }
+		    }
+		    return ret % MOD;
+		}
+		
 ####    02.	*最短路*  
 
 *	floyd  
@@ -62,11 +183,28 @@
 
 *	K短路  
 
-	练手: POJ2449 UVA10740
-		最短路+A*
+	练手: POJ2449 UVA10740   
+	提高: SGU145 SGU314
+
+	最短路+A*
+
 		f[x] = g[x] + h[x]
 		其中h[x]以从t到x的最短路
 		g[x]为从s到x的当前路径长度
+
+	YEN算法
+
+	MPS算法
+
+	最短路树+回溯
+
+	带环K短路
+
+	无环K短路
+	
+	不重复k短路
+		
+		费用流~.~
 
 *	求字典序最小的路径
 
@@ -138,9 +276,6 @@
             int flow = dinic(S, T, T + 1);
             if(flow != sums) flag = false;
         }
-        
-*	混合欧拉回路输出路径 
-
 
 ####    04.	**哈密尔顿回路**
 
@@ -328,16 +463,161 @@
 
 *	关键路径
 
-*	
+	求关键路径：
+
+		1. 关键节点：
+		        正向拓扑序， 求每个点最早到达时间early[i] = max(early[i], early[j] + edge[k]);
+		        利用汇点的early值，反向拓扑求每个点迟到达时间late[i] = min(late[i], late[j] - edge[k]);
+		        关键节点early == late
+		        PS：
+		                最早开始时间可以理解为是必须等到之前的任务完成才能做
+		                最迟开始时间可以理解为是必须为后面的任务留出足够的时间
+		              
+		2. 关键路径 ：
+		        源点到汇点的最长路（可能有多条）
+
 
 ####    08.  **LCA**  
 
 *	倍增算法
 
-	* 	增加对0点的支持(f[][]数组初始值等问题
-	* 	记得验题
+	验题: POJ1330,     
+
+		//LCA O(nlogn)
+		//加边之前使用initLCA()初始化数组
+		//调用solveLCA()初始化LCA
+		//调用getLCA(x,y)返回x和y的LCA
+		struct node {
+		    int u, v, l, next;
+		}e[Maxm];
+		int tot, last[Maxn];
+		void adde(int u, int v) {
+		    e[tot].u = u; e[tot].v = v;
+		    e[tot].next = last[u]; last[u] = tot++;
+		}
+		int depth[Maxn], fa[16][Maxn];
+		int n, m;
+		void initLCA() {
+		    int i, j;
+		    for(i = 0; i <= n; i++) {
+		        depth[i] = -1;
+		        last[i] = -1;
+		        for(j = 0; j < 16; j++) fa[j][i] = -1;
+		    }
+		    tot = 0;
+		}
+		void dfsLCA(int u) {
+		    int j, v;
+		    for(j = last[u]; j != -1; j = e[j].next) {
+		        v = e[j].v;
+		        if(depth[v] == -1) {
+		            fa[0][v] = u;
+		            depth[v] = depth[u] + 1;
+		            dfsLCA(v);
+		        }
+		    }
+		}
+		
+		int getLCA (int x, int y) {
+		    int i, dif = abs(depth[x] - depth[y]);
+		    if (depth[x] < depth[y]) swap(x, y);
+		    for (i = 20 - 1; i >= 0; i--) {
+		        if ((1 << i) & dif) {
+		            dif -= (1 << i);
+		            x = fa[i][x];
+		        }
+		    }
+		    for (i = 16 - 1; i >= 0; i--) {
+		        if (fa[i][x] != fa[i][y]) {
+		            x = fa[i][x];
+		            y = fa[i][y];
+		        }
+		    }
+		    if (x == y) return x;
+		    else return fa[0][x];
+		}
+		
+		void solveLCA() {
+		    int i, j, root = 1;
+		    fa[0][root] = 1;
+		    depth[root] = 0;
+		    dfsLCA(root);
+		    for (i = 1; i < 16; i++)
+		        for(j = 0; j <= n; j++)
+		            fa[i][j] = fa[i-1][fa[i-1][j]];
+		}
 
 *	Tarjan
+
+	验题: HDU2586
+
+		//Tarjan离线LCA
+		//e存放树边
+		//q存放query
+		struct node {
+		    int u, v, n, next;
+		};
+		struct GRAPH {
+		    node e[Maxm];
+		    int tot, last[Maxn];
+		    void init(int n) {
+		        for(int i = 0; i <= n; i++) last[i] = -1;
+		        tot = 0;
+		    }
+		    void adde(int u, int v, int n) {
+		        e[tot].u = u; e[tot].v = v; e[tot].n = n;
+		        e[tot].next = last[u]; last[u] = tot++;
+		        e[tot].u = v; e[tot].v = u; e[tot].n = n;
+		        e[tot].next = last[v]; last[v] = tot++;
+		    }
+		}e, q;
+		int fa[Maxn], lca[Maxn], ans[Maxn];
+		int visit[Maxn];
+		int getfa(int x) {
+		    if(x == fa[x]) return x;
+		    else return (fa[x] = getfa(fa[x]));
+		}
+		
+		void tarjanLCA(int u) {
+		    int i, j, v, f;
+		    fa[u] = u;
+		    visit[u] = 1;
+		    for(j = e.last[u]; j != -1; j = e.e[j].next) {
+		        v = e.e[j].v;
+		        if(!visit[v]) {
+		            tarjanLCA(v);
+		            fa[v] = u;
+		        }
+		    }
+		    for(j = q.last[u]; j != -1; j = q.e[j].next) {
+		        v = q.e[j].v;
+		        if(visit[v]) {
+		            lca[q.e[j].n] = f = getfa(v);
+		        }
+		    }
+		}
+
+*	LCA 转 RMQ
+
+			0:			(1)
+				    	/ \
+			1:		 (2)   (7)
+				     / \     \
+			2:	   (3) (4)   (8)
+				      /   \
+			3:	    (5)   (6)
+
+	step 1: dfs遍历树, 依次记录每次到达的点, 以及每个点的深度得到序列:
+
+		结点访问顺序是: 1 2 3 2 4 5 4 6 4 2 1 7 8 7 1 //共2n-1个值
+		结点对应深度是: 0 1 2 1 2 3 2 3 2 1 0 1 2 1 0
+
+	step 2: 利用ST计算任意区间最小深度的点的ID
+
+	step 3: 对于每次查询, 查询u第一次出现位置到v第一次出现位置区间的最小值
+
+*	
+
 
 
 ####    09.  **连通性**  
@@ -424,75 +704,81 @@
 		 *  右半图 n~n+m-1
 		 */
 		struct edgenode {
-		    int v, next;
-		} e[Maxm];
+			int v, next;
+		}e[Maxm];
 		int last[Maxn], tot;
 		int n, m, match = 0;
 		int mx[Maxn], my[Maxn], dx[Maxn], dy[Maxn], dis, visit[Maxn];
 		queue<int> Q;
 		int ux[Maxn], uy[Maxn], px[Maxn], py[Maxn], pv[Maxn];
 		
-		void adde (int u, int v) {
-		    e[tot].v = v;
-		    e[tot].next = last[u];
-		    last[u] = tot++;
+		void adde(int u, int v) {
+		    e[tot].v = v; e[tot].next = last[u]; last[u] = tot++;
 		}
-		bool searchPath() {
+		bool searchPath()
+		{
 		    int i, j;
-		    dis = MOD;
-		    for (i = 0; i < n; i++) dx[i] = -1;
-		    for (j = n; j < n + m; j++) dy[j] = -1;
-		    while (!Q.empty() ) Q.pop();
-		    for (int i = 0; i < n; i++)
-		        if (-1 == mx[i]) Q.push (i);
-		    int u, v;
-		    while (!Q.empty() ) {
-		        u = Q.front();
-		        Q.pop();
-		        if (dx[u] > dis) break;
-		        for (int j = last[u]; j != -1; j = e[j].next) {
-		            v = e[j].v;
-		            if (-1 != dy[v]) continue;
-		            dy[v] = dx[u] + 1;
-		            if (-1 == my[v])
-		                dis = dy[v];
-		            else {
-		                dx[my[v]] = dy[v] + 1;
-		                Q.push (my[v]);
-		            }
-		        }
-		    }
-		    return dis != MOD;
+			dis = MOD;
+			for(i = 0; i < n; i++) dx[i] = -1;
+			for(j = n; j < n + m; j++) dy[j] = -1;
+			while(!Q.empty()) Q.pop();
+			for(int i = 0; i < n; i++)
+				if(-1 == mx[i]) Q.push(i);
+			int u, v;
+			while(!Q.empty())
+			{
+				u = Q.front(); Q.pop();
+				if(dx[u] > dis) break;
+				for(int j = last[u]; j != -1; j = e[j].next)
+				{
+					v = e[j].v;
+					if(-1 != dy[v]) continue;
+					dy[v] = dx[u] + 1;
+					if(-1 == my[v])
+						dis = dy[v];
+					else
+					{
+						dx[my[v]] = dy[v] + 1;
+						Q.push(my[v]);
+					}
+				}
+			}
+			return dis != MOD;
 		}
 		
-		bool dfs (int u) {
-		    int v;
-		    for (int j = last[u]; j != -1; j = e[j].next) {
-		        v = e[j].v;
-		        if (visit[v] || dx[u] + 1 != dy[v]) continue;
-		        if (dy[v] == dis && my[v] != -1) continue;
-		        visit[v] = true;
-		        if (-1 == my[v] || dfs (my[v]) ) {
-		            my[v] = u;
-		            mx[u] = v;
-		            return true;
-		        }
-		    }
-		    return false;
+		bool dfs(int u)
+		{
+			int v;
+			for(int j = last[u]; j != -1; j = e[j].next)
+			{
+				v = e[j].v;
+				if(visit[v] || dx[u] + 1 != dy[v]) continue;
+				if(dy[v] == dis && my[v] != -1) continue;
+				visit[v] = true;
+				if(-1 == my[v] || dfs(my[v]))
+				{
+					my[v] = u;
+					mx[u] = v;
+					return true;
+				}
+			}
+			return false;
 		}
 		
-		int solve() {
+		int solve()
+		{
 		    int i, j;
-		    match = 0;
-		    for (i = 0; i < n; i++) mx[i] = -1;
-		    for (j = n; j < n + m; j++) my[j] = -1;
-		//  match += preHungary();
-		    while (searchPath() ) {
-		        for (j = n; j < n + m; j++) visit[j] = false;
-		        for (int i = 0; i < n; i++)
-		            if (-1 == mx[i] && dfs (i) ) match++;
-		    }
-		    return match;
+			match = 0;
+			for(i = 0; i < n; i++) mx[i] = -1;
+			for(j = n; j < n + m; j++) my[j] = -1;
+		//	match += preHungary();
+			while(searchPath())
+			{
+				for(j = n; j < n + m; j++) visit[j] = false;
+				for(int i = 0; i < n; i++)
+					if(-1 == mx[i] && dfs(i)) match++;
+			}
+			return match;
 		}
 
 *   稳定婚姻问题
