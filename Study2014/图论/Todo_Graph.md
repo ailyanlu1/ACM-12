@@ -786,7 +786,38 @@
 *   稳定婚姻问题
 
 	延迟认可算法(Gale-Shapley算法)
-	
+
+			int mx[Maxn], my[Maxm]; //x匹配的y, y匹配的x
+			//yorder表示在x眼中y的顺序, 0~m-1为喜爱度递减的y的编号
+			//xorder表示在y眼中x的顺序, 0~n-1为编号0~n-1的x的重要度
+			//越重要, 值越小
+			int yorder[Maxn][Maxm], xorder[Maxm][Maxn];
+			int cur[Maxn];
+			int n, m;
+			queue<int> que;
+			void GaleShapley() {
+			    int i, j, v;
+			    for(i = 0; i <= n; i++) mx[i] = -1,cur[i] = 0;//初始化
+			    for(j = 0; j <= m; j++) my[j] = -1;
+			    while(!que.empty()) que.pop();
+			    for(i = 0; i < n; i++) que.push(i);//将x加入队列
+			    while(!que.empty()) {//x还有没找到朋友的
+			        i = que.front(); que.pop();
+			        if(cur[i] >= m) continue;
+			        v = yorder[i][cur[i]++];
+			        if(my[v] == -1) {   //y没有匹配
+			            mx[i] = v; my[v] = i;
+			        }
+			        else if(xorder[v][i] < xorder[v][my[v]]) {//i比之前的好
+			            mx[my[v]] = -1;
+			            que.push(my[v]);
+			            my[v] = i; mx[i] = v;
+			        }
+			        else {//i比以前的差, i找下一个y
+			            que.push(i);
+			        }
+			    }
+			}	
 
 *   带花树
 
