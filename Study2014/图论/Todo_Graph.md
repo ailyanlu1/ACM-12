@@ -462,6 +462,109 @@
 
 	区分字典序最小和标号小的尽量靠前   特殊题目要求: POJ3687
 
+		#include <cstdio>
+		#include <cstring>
+		#include <cstdlib>
+		#include <cmath>
+		#include <iostream>
+		#include <algorithm>
+		#include <vector>
+		#include <queue>
+		using namespace std;
+		
+		#define Maxn 205
+		#define Maxm 41000
+		#define MP make_pair
+		#define PB push_back
+		#define AA first
+		#define BB second
+		#define SZ size()
+		#define BG begin()
+		#define ED end()
+		int n, m;
+		struct node {
+		    int u, v, next;
+		}e[Maxm];
+		int tot, last[Maxn];
+		priority_queue<int > Q;
+		vector<int> ans, out;
+		int deg[Maxn];
+		
+		void adde(int u, int v) {
+		    e[tot].u = u; e[tot].v = v; e[tot].next = last[u]; last[u] = tot++;
+		}
+		
+		int main() {
+		    int i, j, u, v, te;
+		    scanf("%d", &te);
+		    while(te--) {
+		        scanf("%d%d", &n, &m);
+		        tot = 0;
+		        for(i = 1; i <= n; i++) {
+		            last[i] = -1;
+		            deg[i] = 0;
+		        }
+		        for(i = 0; i < m; i++) {
+		            scanf("%d%d", &u, &v);
+		            adde(v, u);
+		            deg[u]++;
+		        }
+		        while(!Q.empty()) Q.pop();
+		        for(i = 1; i <= n; i++) {
+		            if(deg[i] == 0) Q.push(i);
+		        }
+		        ans.clear();
+		        out.clear();
+		        while(!Q.empty()) {
+		            u = Q.top();
+		            Q.pop();
+		            ans.PB(u);
+		            for(j = last[u]; j != -1; j = e[j].next) {
+		                v = e[j].v;
+		                deg[v]--;
+		                if(deg[v] == 0) Q.push(v);
+		            }
+		        }
+		        if(ans.SZ < n) {
+		            printf("-1\n");
+		        }
+		        else {
+		            reverse(ans.BG, ans.ED);
+		            out = ans;
+		            for(i = 0; i < n; i++) {
+		                out[ans[i] - 1] = i + 1;
+		            }
+		            for(i = 0; i < n; i++) {
+		                if(i) printf(" ");
+		                printf("%d", out[i]);
+		            }
+		            printf("\n");
+		        }
+		    }
+		    return 0;
+		}
+		
+		/*
+		2
+		
+		5 4
+		5 1
+		4 2
+		1 3
+		2 3
+		
+		10 5
+		4 1
+		8 1
+		7 8
+		4 1
+		2 8
+		ans:
+		2 4 5 3 1        逆向建图
+		5 1 6 2 7 8 3 4 9 10  没有判重边的话就输出 -1
+		
+		*/
+
 	有重复标号字典序最小???
 
 *	有向图拓扑排序计数(状压dp)
@@ -890,37 +993,37 @@
 
 	延迟认可算法(Gale-Shapley算法)
 
-			int mx[Maxn], my[Maxm]; //x匹配的y, y匹配的x
-			//yorder表示在x眼中y的顺序, 0~m-1为喜爱度递减的y的编号
-			//xorder表示在y眼中x的顺序, 0~n-1为编号0~n-1的x的重要度
-			//越重要, 值越小
-			int yorder[Maxn][Maxm], xorder[Maxm][Maxn];
-			int cur[Maxn];
-			int n, m;
-			queue<int> que;
-			void GaleShapley() {
-			    int i, j, v;
-			    for(i = 0; i <= n; i++) mx[i] = -1,cur[i] = 0;//初始化
-			    for(j = 0; j <= m; j++) my[j] = -1;
-			    while(!que.empty()) que.pop();
-			    for(i = 0; i < n; i++) que.push(i);//将x加入队列
-			    while(!que.empty()) {//x还有没找到朋友的
-			        i = que.front(); que.pop();
-			        if(cur[i] >= m) continue;
-			        v = yorder[i][cur[i]++];
-			        if(my[v] == -1) {   //y没有匹配
-			            mx[i] = v; my[v] = i;
-			        }
-			        else if(xorder[v][i] < xorder[v][my[v]]) {//i比之前的好
-			            mx[my[v]] = -1;
-			            que.push(my[v]);
-			            my[v] = i; mx[i] = v;
-			        }
-			        else {//i比以前的差, i找下一个y
-			            que.push(i);
-			        }
-			    }
-			}	
+		int mx[Maxn], my[Maxm]; //x匹配的y, y匹配的x
+		//yorder表示在x眼中y的顺序, 0~m-1为喜爱度递减的y的编号
+		//xorder表示在y眼中x的顺序, 0~n-1为编号0~n-1的x的重要度
+		//越重要, 值越小
+		int yorder[Maxn][Maxm], xorder[Maxm][Maxn];
+		int cur[Maxn];
+		int n, m;
+		queue<int> que;
+		void GaleShapley() {
+		    int i, j, v;
+		    for(i = 0; i <= n; i++) mx[i] = -1,cur[i] = 0;//初始化
+		    for(j = 0; j <= m; j++) my[j] = -1;
+		    while(!que.empty()) que.pop();
+		    for(i = 0; i < n; i++) que.push(i);//将x加入队列
+		    while(!que.empty()) {//x还有没找到朋友的
+		        i = que.front(); que.pop();
+		        if(cur[i] >= m) continue;
+		        v = yorder[i][cur[i]++];
+		        if(my[v] == -1) {   //y没有匹配
+		            mx[i] = v; my[v] = i;
+		        }
+		        else if(xorder[v][i] < xorder[v][my[v]]) {//i比之前的好
+		            mx[my[v]] = -1;
+		            que.push(my[v]);
+		            my[v] = i; mx[i] = v;
+		        }
+		        else {//i比以前的差, i找下一个y
+		            que.push(i);
+		        }
+		    }
+		}	
 
 *   带花树
 
