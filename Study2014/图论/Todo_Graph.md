@@ -3,6 +3,7 @@
 ******  
 ### **Contents** 
 
+0.  **基础图**
 1.  **生成树**   
 2.  *最短路*  
 3.  **欧拉回路**  
@@ -32,6 +33,25 @@
 27. **待解决的问题**  
 
 ----------------------------------------------------------
+
+####	00. **基础图**
+
+*	图struct
+
+		struct GRAPH {
+		    struct node {
+		        int u, v, next;
+		    }adj[Maxm];
+		    int tot, last[Maxn];
+		    void init(int n) {
+		        for(int i = 0; i <= n; i++) last[i] = -1;
+		        tot = 0;
+		    }
+		    void adde(int u, int v) {
+		        adj[tot].u = u; adj[tot].v = v; 
+		        adj[tot].next = last[u]; last[u] = tot++;
+		    }
+		}e;
 
 ####    01. **生成树**  
 
@@ -285,6 +305,8 @@
 ####    05.  **RMQ**  
 
 *	RMQ实现模板
+
+	验题 POJ3264
 
 		struct RMQ {
 		    int n;
@@ -575,21 +597,18 @@
 		//Tarjan离线LCA
 		//e存放树边
 		//q存放query
-		struct node {
-		    int u, v, n, next;
-		};
 		struct GRAPH {
-		    node e[Maxm];
+		    struct node {
+		        int u, v, n, next;
+		    }adj[Maxm];
 		    int tot, last[Maxn];
 		    void init(int n) {
 		        for(int i = 0; i <= n; i++) last[i] = -1;
 		        tot = 0;
 		    }
 		    void adde(int u, int v, int n) {
-		        e[tot].u = u; e[tot].v = v; e[tot].n = n;
-		        e[tot].next = last[u]; last[u] = tot++;
-		        e[tot].u = v; e[tot].v = u; e[tot].n = n;
-		        e[tot].next = last[v]; last[v] = tot++;
+		        adj[tot].u = u; adj[tot].v = v; adj[tot].n = n;
+		        adj[tot].next = last[u]; last[u] = tot++;
 		    }
 		}e, q;
 		int fa[Maxn], lca[Maxn], ans[Maxn];
@@ -603,17 +622,18 @@
 		    int i, j, v, f;
 		    fa[u] = u;
 		    visit[u] = 1;
-		    for(j = e.last[u]; j != -1; j = e.e[j].next) {
-		        v = e.e[j].v;
+		    for(j = e.last[u]; j != -1; j = e.adj[j].next) {
+		        v = e.adj[j].v;
 		        if(!visit[v]) {
 		            tarjanLCA(v);
 		            fa[v] = u;
 		        }
 		    }
-		    for(j = q.last[u]; j != -1; j = q.e[j].next) {
-		        v = q.e[j].v;
+		    for(j = q.last[u]; j != -1; j = q.adj[j].next) {
+		        v = q.adj[j].v;
 		        if(visit[v]) {
-		            lca[q.e[j].n] = f = getfa(v);
+		            lca[q.adj[j].n] = f = getfa(v);
+		            ans[q.adj[j].n] = dist[v] + dist[u] - 2 * dist[f];
 		        }
 		    }
 		}
@@ -643,7 +663,71 @@
 
 ####    09.  **连通性**  
 
+*	强联通分量(Tarjan)
 
+		/*
+		 *   SCC 使用图struct
+		 */      
+		struct GRAPH {
+		    struct node {
+		        int u, v, next;
+		    }adj[Maxm];
+		    int tot, last[Maxn];
+		    void init(int n) {
+		        for(int i = 0; i <= n; i++) last[i] = -1;
+		        tot = 0;
+		    }
+		    void adde(int u, int v) {
+		        adj[tot].u = u; adj[tot].v = v; 
+		        adj[tot].next = last[u]; last[u] = tot++;
+		    }
+		}e;
+		int dfn[Maxn], low[Maxn], belong[Maxn], instack[Maxn], ncnt, nindex;
+		stack<int> sta;
+		void Tarjan(int u) {
+		    dfn[u] = low[u] = nindex++;
+		    sta.push(u);
+		    instack[u] = 1;
+		    int j, v;
+		    for(j = e.last[u]; ~j; j = e.adj[j].next) {
+		        v = e.adj[j].v;
+		        if(-1 == dfn[v]) {
+		            Tarjan(v);
+		            if(low[u] > low[v]) low[u] = low[v];
+		        }
+		        else if(instack[v] && dfn[v] < low[u]) {
+		            low[u] = dfn[v];
+		        }
+		    }
+		    if(dfn[u] == low[u]) {
+		        do {
+		            v = sta.top();
+		            sta.pop();
+		            instack[v] = 0;
+		            belong[v] = ncnt;
+		        }while(u != v);
+		        ncnt++;
+		    }
+		}
+		void solve(){
+		    int i, flag = 0;
+		    memset(dfn, -1, sizeof(dfn));
+		    memset(low, -1, sizeof(low));
+		    memset(instack, 0, sizeof(instack));
+		    memset(belong, -1, sizeof(belong));
+		    ncnt = 1;
+		    nindex = 1;
+		    for(i = 1; i <= n; i++){
+		        if(-1 == dfn[i]) {
+		            Tarjan(i);
+		            flag++;
+		        }
+		    }
+		    ///*
+		//    for(i = 1; i <= n; i++)
+		//        printf("%d %d\n", i, belong[i]);
+		    //*/
+		}
 
 ####    10. **2 SAT**  
 
