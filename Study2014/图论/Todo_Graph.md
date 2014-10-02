@@ -286,7 +286,26 @@
 
 *	RMQ实现模板
 
-
+		struct RMQ {
+		    int n;
+		    int st[20][Maxn];
+		    void init(int v[], int L) {
+		        int i, j, k;
+		        n = L;
+		        for(i = 0; i <= n; i++) st[0][i] = v[i];
+		        for(j = 1, k = 0; (1<<j) <= n; j++, k++) {
+		            for(i = 0; i + (1<<j) - 1<= n; i++) {
+		                st[j][i] = min(st[j - 1][i], st[j - 1][i + (1<<k)]);
+		            }
+		        }
+		    }
+		    int query(int l, int r) {
+		          int k = log2(r - l + 1);
+		//        int k = 31 - __builtin_clz(r - l + 1);
+		//        int k = kk[r - l + 1];
+		        return min(st[k][l], st[k][r - (1<<k) + 1]);
+		    }
+		}rmq1, rmq2;
 
 
 ####    06.  *最小环&最大环* 
