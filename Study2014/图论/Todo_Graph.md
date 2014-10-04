@@ -3,15 +3,15 @@
 ******  
 ### **Contents** 
 
-0.  **基础图**
+0.  *基础图*
 1.  **生成树**   
 2.  *最短路*  
-3.  **欧拉回路**  
+3.  *欧拉回路*  
 4.  **哈密尔顿回路**  
-5.  **RMQ**  
+5.  *RMQ*  
 6.  *最小环&最大环*  
 7.  *拓扑排序*  
-8.  **LCA**  
+8.  *LCA*  
 9.  **连通性**  
 10. **2 SAT**  
 11. **匹配问题**  
@@ -94,6 +94,8 @@
 *	bfs树
 
 *	最短路径树
+
+*   斯坦纳树 
 
 *	生成树计数
 
@@ -788,10 +790,10 @@
 		int dfn[Maxn], low[Maxn], belong[Maxn], instack[Maxn], ncnt, nindex;
 		stack<int> sta;
 		void Tarjan(int u) {
+		    int j, v;
 		    dfn[u] = low[u] = nindex++;
 		    sta.push(u);
 		    instack[u] = 1;
-		    int j, v;
 		    for(j = e.last[u]; ~j; j = e.adj[j].next) {
 		        v = e.adj[j].v;
 		        if(-1 == dfn[v]) {
@@ -831,6 +833,82 @@
 		//        printf("%d %d\n", i, belong[i]);
 		    //*/
 		}
+
+*   边双连通(Tarjan)
+
+        /*
+        *EBCC
+        */
+        struct GRAPH {
+            struct node {
+                int u, v, next;
+            }adj[Maxm];
+            int tot, last[Maxn];
+            void init(int n) {
+                for(int i = 0; i <= n; i++) last[i] = -1;
+                tot = 0;
+            }
+            void adde(int u, int v) {
+                adj[tot].u = u; adj[tot].v = v; 
+                adj[tot].next = last[u]; last[u] = tot++;
+            }
+        }e;
+        int n, m;
+        int dfn[Maxn], low[Maxn], belong[Maxn], instack[Maxn], nindex, ncnt;
+        stack<int> sta;      
+        void Tarjan(int u, int from) {
+            int j, v;
+            dfn[u] = low[u] = nindex++;
+            instack[u] = 1;
+            sta.push(u);
+            for(j = e.last[u]; ~j; j = e.adj[j].next) {
+                if(j == from) continue;
+                v = e.adj[j].v;
+                if(-1 == dfn[v]) {
+                    Tarjan(u, j ^ 1);
+                    low[u] = min(low[u], low[v]);
+                }
+                else if(instack[v] && dfn[v] < low[u]) {
+                    low[u] = dfn[v];
+                }
+            }
+            if(dfn[u] == low[u]) {
+                do {
+                    v = sta.top();
+                    sta.pop();
+                    instack[v] = 0;
+                    belong[v] = ncnt;
+                } while(v != u);
+                ncnt++;
+            }
+        }
+              
+        void solve() {
+            memset(dfn, -1, sizeof(dfn));
+            memset(low, -1, sizeof(low));
+            memset(instack, 0, sizeof(instack));
+            memset(belong, -1, sizeof(belong));
+            ncnt = 1;
+            nindex = 1;
+            int flag = 0;
+            for(int i = 1; i <= n; i++)
+                if(-1 == dfn[i]) {
+                    Tarjan(i, -1);
+                    flag++;
+                }
+              
+            ///*
+            for(int i = 1; i <= n; i++)
+                cout << i << " " << belong[i] <<endl;
+            //*/
+        }
+
+
+*   点双连通(Tarjan+重建图)
+
+
+
+
 
 ####    10. **2 SAT**  
 
@@ -1762,7 +1840,94 @@
 
 ####    14. **全局最小割**  
 
+*   StoerWagner(求全局最小割)
 
+    验题:POJ2914
+
+        //朴素最小割
+        //注意节点下标0~n-1
+        int comb[Maxn];
+        int edge[Maxn][Maxn], g[Maxn][Maxn], node[Maxn];
+        int S, T, minCut, k;
+        int top, sta[Maxn];
+        int maxi;
+        vector<int> parta, partb;
+        vector<int> belong[Maxn];
+        
+        int Search (int n) {
+            int i, j, u;
+            int vis[Maxn], wet[Maxn];
+            memset(vis, 0, sizeof(vis)); 
+            memset(wet, 0, sizeof(wet));
+            int minCut = 0, temp = -1, top = 0;
+            int maxi;
+            S = -1, T = -1;
+            for (i=0; i< n; i++) {
+                maxi = -MOD;
+                for (j = 0; j < n; j++) {
+                    u = node[j];
+                    if (!comb[u] && !vis[u] && wet[u] > maxi) {
+                        temp = u;
+                        maxi = wet[u];
+                    }
+                }
+                sta[top++] = temp;
+                vis[temp] = true;
+                if (i == n - 1)
+                    minCut = maxi;
+                for (j = 0; j < n; j++) {
+                    u = node[j];
+                    if (!comb[u] && !vis[u]) {
+                        wet[u] += edge[temp][u];
+                    }
+                }
+            }
+            S = sta[top - 2];
+            T = sta[top - 1];
+            for (i = 0; i < top; i++)  node[i] = sta[i];
+            return minCut;
+        }
+        
+        int StoerWagner (int n) {
+            int ans = MOD, i, j, cur;
+            memset(comb, 0, sizeof(comb));
+            for (i = 0; i < n; i++)
+                node[i] = i;
+            for (i = 1; i < n; i++) {
+                k = n - i + 1;
+                cur = Search (k);
+                if (cur < ans) {
+                    ans = cur;
+                }
+                if (ans == 0) return ans;
+                comb[T] = true;
+                for (j = 0; j < n; j++) {
+                    if (j == S) continue;
+                    if (!comb[j]) {
+                        edge[S][j] += edge[T][j];
+                        edge[j][S] += edge[j][T];
+                    }
+                }
+            }
+            return ans;
+        }
+        
+        int main() {
+            int n, m;
+            while (scanf ("%d%d", &n, &m) != EOF) {
+                memset(edge, 0, sizeof(edge));
+                for (int i = 0; i < m; i++) {
+                    int u, v, z;
+                    scanf ("%d%d%d", &u, &v, &z);
+                    edge[u][v] += z;
+                    edge[v][u] += z;
+                }
+                printf ("%d\n", StoerWagner (n) );
+            }
+            return 0;
+        }
+
+*   求K边连通分量个数(StoerWagner变形)
 
 ####    15. **网络流拓展**  
 
@@ -1855,6 +2020,43 @@
 
 ####    18. **树的同构**  
 
+*   树Hash判定树同构
+
+        int h[11000];
+        char str1[3100], str2[3100];
+        char *p;
+        int Hash (int j) {
+            int sum = h[j + 5000];//这里的j是记录的节点度
+            //这个巧妙的循环,把子节点的hash值都加给了父节点,作为父节点的hash值
+            //由于树节点顺序不确定, 因此是子树hash值*根值的累加
+            while (*p && *p++ == '0') { 
+                sum = (sum + h[j] * Hash (j + 1) ) % 19001;
+            }
+            return (sum * sum) % 19001;
+        }
+        inline void init() {
+            //为每一个树根节点给定一个随机权值
+            for (int i = 0; i < 10000; i++)
+                h[i] = (rand() %19901);
+        }
+        int main() {
+            int T;
+            scanf ("%d", &T);
+            init();
+            while (T--) {
+                scanf ("%s%s", str1, str2);
+                p = str1;
+                int a = Hash (1);
+                p = str2;
+                int b = Hash (1);
+                if (a == b) {
+                    puts ("same");
+                } else {
+                    puts ("different");
+                }
+            }
+            return 0;
+        }
 
 
 ####    19. **差分约束**  
@@ -1863,15 +2065,18 @@
 
 ####    20. **分数规划**  
 
+* todo
 
+POJ1639, 2728, 2976, 3155, 3621 ZOJ2676
 
-####    21. **偏序集** 
+####    21. ***偏序集***
 
 
 
 ####    22. **最大团**  
 
 *   最大团
+
 *   极大团计数
 
 
@@ -1891,6 +2096,7 @@
 ####	26. **Other**
 
 *	中国邮递员
+
 *	网络流相关:
 
 		1、 连续最短路算法（Successive Shortest Path）；
