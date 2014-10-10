@@ -53,6 +53,199 @@
 		    }
 		}e;
 
+*   n条边的带一个环树森林
+
+        struct CirGraph {
+            struct node {
+                //onCir==0 不在环上, ==1在环上
+                int u, v, l, onCir, next;
+            } adj[Maxm];
+            int tot, last[Maxn];
+            //vis==0未遍历, ==1遍历不是环上, ==2在环上
+            int top, vis[Maxn], sta[Maxn];
+            void adde(int u, int v, int l) {
+                adj[tot].u = u; adj[tot].v = v; adj[tot].l = l; adj[tot].onCir = 0;
+                adj[tot].next = last[u]; last[u] = tot++;
+            }
+            void init(int n) {
+                tot = 0;
+                for(int i = 0; i <= n; i++) last[i] = -1;
+            }
+            void dfs(int u, int from) {
+                int j, v;
+                vis[u] = 1;
+                for(j = last[u]; j != -1; j = adj[j].next) {
+                    if(j == from) continue;
+                    v = adj[j].v;
+                    if(!vis[v]) {
+                        sta[++top] = j;
+                        dfs(v, j ^ 1);
+                        top--;
+                    }
+                    else if(vis[v] == 1 && vis[u] == 1){
+                        int tp = top, jj;
+                        sta[++tp] = j;
+                        while(tp) {
+                            jj = sta[tp--];
+                            adj[jj].onCir = adj[jj ^ 1].onCir = 1;
+                            vis[adj[jj].u] = 2;
+                            if(adj[jj].u == v) break;
+                        }
+                    }
+                }
+            }
+            void ready(int n) {
+                int i, j;
+                for(i = 0; i <= n; i++) vis[i] = 0;
+                for(i = 1; i <= n; i++) {
+                    if(!vis[i]) {
+                        top = 0;
+                        dfs(i, -1);
+                    }
+                }
+            }
+        }gg;
+
+*   完整版
+
+        set<LL> Hset;
+        int S[Maxn<<1|1], T[Maxn];
+        int next[Maxn<<1|1], is[Maxn];
+        void getnext(int T[], int LT, int next[]) {
+            int i, j;
+            next[0]=-1; next[1] = 0;
+            for (i = 1, j = 0; i < LT; ) {
+                while (j != -1 && T[i] != T[j]) j = next[j];
+                i++; j++;
+                next[i] = j;
+            }
+        }
+        void KMP (int S[], int LS, int T[], int LT, int next[]) {
+            int i, j;
+            for(i = 0; i < LS; i++) is[i] = 0;
+            for (i = 0, j = 0; i < LS; i++) {
+                while (j != -1 && S[i] != T[j]) j = next[j];
+                j++;
+                if (j == LT) {
+                    is[i - LT + 1] = 1;
+                    j = next[j];
+                }
+            }
+        }
+        //init初始化
+        //adde加边(注意单向边和双向边)
+        //ready()连通块, 环, 求树hash, 求环可旋转位置
+        struct CirGraph {
+            struct node {
+                //onCir==0 不在环上, ==1在环上
+                int u, v, l, onCir, next;
+            } adj[Maxm];
+            int tot, last[Maxn];
+            //vis==0未遍历, ==1遍历不是环上, ==2在环上
+            int top, vis[Maxn], sta[Maxn];
+            int dep[Maxn];
+            LL H[Maxn];
+            LL h[Maxn];
+            vector<int> ok[Maxn];//(每个环可旋转长度)
+            vector<int> belong[Maxn];//(每个环结点集合)
+            int circnt;//环/树个数(1~circnt)
+            void adde(int u, int v, int l) {
+                adj[tot].u = u; adj[tot].v = v; adj[tot].l = l; adj[tot].onCir = 0;
+                adj[tot].next = last[u]; last[u] = tot++;
+            }
+            void init(int n) {
+                tot = 0;
+                for(int i = 0; i <= n; i++) last[i] = -1;
+            }
+            void dfs(int u, int from) {
+                int j, v;
+                vis[u] = 1;
+                for(j = last[u]; j != -1; j = adj[j].next) {
+                    if(j == from) continue;
+                    v = adj[j].v;
+                    if(!vis[v]) {
+                        sta[++top] = j;
+                        dfs(v, j ^ 1);
+                        top--;
+                    }
+                    else if(vis[v] == 1 && vis[u] == 1){
+                        int tp = top, jj;
+                        sta[++tp] = j;
+                        while(tp) {
+                            jj = sta[tp--];
+                            adj[jj].onCir = adj[jj ^ 1].onCir = 1;
+                            vis[adj[jj].u] = 2;
+                            belong[circnt].PB(adj[jj].u);
+                            if(adj[jj].u == v) break;
+                        }
+                    }
+                }
+            }
+            void getDep(int u, int from) {
+                int j, v;
+                dep[u] = 1;
+                for(j = last[u]; j != -1; j = adj[j].next) {
+                    if(j == from || adj[j].onCir) continue;
+                    v = adj[j].v;
+                    getDep(v, j ^ 1);
+                    cmax(dep[u], dep[v] + 1);
+                }
+            }
+            void Hash(int u, int from) {
+                int j, v;
+                LL s = h[dep[u]];
+                for(j = last[u]; j != -1; j = adj[j].next) {
+                    if(j == from || adj[j].onCir) continue;
+                    v = adj[j].v;
+                    Hash(v, j ^ 1);
+                    s = (s + h[dep[u]] * H[v]) % MOD;
+                }
+                H[u] = s;
+            }
+            void ready(int n) {
+                int i, j;
+                circnt = 0;
+                for(i = 0; i <= n; i++) vis[i] = 0;
+                for(i = 1; i <= n; i++) {
+                    if(!vis[i]) {
+                        top = 0;
+                        circnt++;
+                        belong[circnt].resize(0);
+                        dfs(i, -1);
+                    }
+                }
+        //        for(i = 0; i < tot; i++) printf("%d %d --> %d %d\n", i, adj[i].u, adj[i].v, adj[i].onCir);
+                Hset.clear();
+                srand(time(NULL));
+                for(i = 0; i <= n; i++) {
+                    LL x = ((rand() << 15) + rand()) % MOD;
+                    while(Hset.find(x) != Hset.ED) x = ((rand() << 15) + rand()) % MOD;
+                    Hset.insert(x);
+                    h[i] = x;
+                }
+                for(i = 1; i <= n; i++) if(vis[i] == 2) {
+                    getDep(i, -1);
+                    Hash(i, -1);
+                }
+        //        for(i = 1; i <= n; i++) cout << "hash " << i <<" " << H[i] << endl;
+                for(i = 1; i <= circnt; i++) {
+                    ok[i].resize(0);
+                    int L = belong[i].SZ;
+                    for(j = 0; j < L; j++) {
+                        S[j + L] = S[j] = T[j] = H[belong[i][j]];
+                    }
+                    getnext(T, L, next);
+                    KMP(S, L << 1, T, L, next);
+                    for(j = 0; j < L; j++) {
+                        if(is[j]) ok[i].PB(j);
+                    }
+        //            cout << "OK ";for(j = 0; j < ok[i].SZ; j++) cout << ok[i][j] << " "; cout << endl;
+                }
+            }
+            
+        }gg;
+
+
 ####    01. **生成树**  
 
 *	Prim  
@@ -1838,7 +2031,7 @@
 		
 		另外, 手写que需要注意, 一个点可能入队不止一次.
 
-####    14. **全局最小割**  
+####    14. *全局最小割*  
 
 *   StoerWagner(求全局最小割)
 
@@ -1848,7 +2041,7 @@
         //注意节点下标0~n-1
         int comb[Maxn];
         int edge[Maxn][Maxn], g[Maxn][Maxn], node[Maxn];
-        int S, T, minCut, k;
+        int S, T, minCut;
         int top, sta[Maxn];
         int maxi;
         vector<int> parta, partb;
@@ -1911,9 +2104,9 @@
             }
             return ans;
         }
-        
+        int n, m;
         int main() {
-            int n, m;
+            int i, j, u, v, w;
             while (scanf ("%d%d", &n, &m) != EOF) {
                 memset(edge, 0, sizeof(edge));
                 for (int i = 0; i < m; i++) {
@@ -1927,7 +2120,121 @@
             return 0;
         }
 
-*   求K边连通分量个数(StoerWagner变形)
+*   K连通块计数
+
+    HDU 4654
+    
+        int n, m, k;
+        //K连通块计数
+        //注意节点下标0~n-1
+        int comb[Maxn];
+        int edge[Maxn][Maxn], g[Maxn][Maxn], node[Maxn];
+        int S, T, minCut;
+        int top, sta[Maxn];
+        int maxi;
+        vector<int> parta, partb;
+        vector<int> belong[Maxn];
+        
+        int Search (int n) {
+            int i, j, u;
+            int vis[Maxn], wet[Maxn];
+            memset(vis, 0, sizeof(vis)); 
+            memset(wet, 0, sizeof(wet));
+            int minCut = 0, temp = -1, top = 0;
+            int maxi;
+            S = -1, T = -1;
+            for (i=0; i< n; i++) {
+                maxi = -MOD;
+                for (j = 0; j < n; j++) {
+                    u = node[j];
+                    if (!comb[u] && !vis[u] && wet[u] > maxi) {
+                        temp = u;
+                        maxi = wet[u];
+                    }
+                }
+                sta[top++] = temp;
+                vis[temp] = true;
+                if (i == n - 1)
+                    minCut = maxi;
+                for (j = 0; j < n; j++) {
+                    u = node[j];
+                    if (!comb[u] && !vis[u]) {
+                        wet[u] += edge[temp][u];
+                    }
+                }
+            }
+            S = sta[top - 2];
+            T = sta[top - 1];
+            for (i = 0; i < top; i++)  node[i] = sta[i];
+            return minCut;
+        }
+        
+        int StoerWagner (vector<int> & li) {
+            int ans = MOD, i, j, k,cur, n = li.SZ, u, v;
+            int used[Maxn];
+            memset(comb, 0, sizeof(comb));
+            for (i = 0; i < n; i++) {
+                node[i] = i;
+                belong[i].clear();
+                belong[i].PB(i);
+            }
+            for (i = 1; i < n; i++) {
+                k = n - i + 1;
+                cur = Search(k);
+                if (cur < ans) {
+                    ans = cur;
+                    for(j = 0; j < n; j++) used[j] = 0;
+                    for(j = 0; j < belong[T].SZ; j++) {
+                        used[belong[T][j]] = 1;
+                    }
+                }
+                for(j = 0; j < belong[T].SZ; j++) belong[S].PB(belong[T][j]);
+                if (ans == 0) break;
+                comb[T] = true;
+                for (j = 0; j < n; j++) {
+                    if (j == S) continue;
+                    if (!comb[j]) {
+                        edge[S][j] += edge[T][j];
+                        edge[j][S] += edge[j][T];
+                    }
+                }
+            }
+            parta.clear(); partb.clear();
+            for(j = 0; j < n; j++) {
+                if(used[j]) parta.PB(li[j]);
+                else partb.PB(li[j]);
+            }
+            return ans;
+        }
+        int dfs(vector<int> &li) {
+            int n = li.SZ, i, j;
+            for(i = 0; i < n; i++) {
+                for(j = 0; j < n; j++) {
+                    edge[i][j] = g[li[i]][li[j]];
+                }
+            }
+            int cur = StoerWagner(li);
+            if(cur >= k) return 1;
+            vector<int> a(parta), b(partb);
+            return dfs(a) + dfs(b);
+        }
+        int main() {
+            int i, j, u, v, w;
+            while (scanf ("%d%d%d", &n, &m, &k) != EOF) {
+                memset(g, 0, sizeof(g));
+                for (int i = 0; i < m; i++) {
+                    scanf ("%d%d", &u, &v);
+                    u--; v--;
+                    g[u][v] += 1;
+                    g[v][u] += 1;
+                }
+                vector<int> li;
+                for(i = 0; i < n; i++) li.PB(i);
+                printf ("%d\n", dfs(li));
+            }
+            return 0;
+        }
+
 
 ####    15. **网络流拓展**  
 
@@ -2067,7 +2374,7 @@
 
 * todo
 
-POJ1639, 2728, 2976, 3155, 3621 ZOJ2676
+POJ2728, 2976, 3155, 3621 ZOJ2676
 
 ####    21. ***偏序集***
 
