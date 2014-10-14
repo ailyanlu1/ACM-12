@@ -62,55 +62,58 @@ typedef vector<PLL> VLL;
 typedef queue<PLL> QLL;
 typedef deque<PLL> DQLL;
 typedef set<PLL> SLL;
-#define Maxn 111111
-#define Maxm 111111
-priority_queue<PII> que;
-class ShoppingSurveyDiv1
+#define Maxn 111
+#define Maxm 111
+#define MOD 1000000007
+int a[Maxn][Maxm], sum[Maxn][Maxm];
+class ChocolateDividingEasy
 {
 public:
     int n, m;
-    int buy[Maxn];
-    vector<int> can, ok;
-    int inok[Maxn];
-    int minValue (int N, int K, vector <int> s)
-    {
-        int ret = 0;
+    int check(int x) {
         int i, j, u, v, w;
-        m = s.SZ;
-        for(i = 1; i <= N; i++) buy[i] = 0;
-        while(!que.empty()) que.pop();
-        for(i = 1; i <= N; i++) que.push(MP(0, i)), inok[i] = false;
-        sort(s.BG, s.ED);
-        reverse(s.BG, s.ED);
-        ok.clear();
-        for(i = 0; i < m; i++) {
-//            cout << i <<endl;
-            can.clear();
-            for(j = 0; j < s[i] && j < ok.SZ; j++) {
-                can.PB(ok[j]);
-            }
-            for(; j < s[i]; j++) {
-                can.PB(que.top().BB);
-                que.pop();
-            }
-            for(j = 0; j < can.SZ; j++) {
-//                cout << can[j] << " ~ ";
-                buy[can[j]]++;
-                if(buy[can[j]] < K){
-                    que.push(MP(-buy[can[j]], can[j]));
-                }
-                else {
-                    if(!inok[can[j]]){
-                        ok.PB(can[j]);
-                        inok[can[j]] = 1;
+        for(i = 1; i < n - 1; i++) {
+            for(u = i + 1; u < n; u++) {
+                for(j = 1; j < m - 1; j++) {
+                    for(v = j + 1; v < m; v++) {
+                        if(sum[i][j] < x || sum[i][v] - sum[i][j] < x || sum[i][m] - sum[i][v] < x) continue;
+                        if(sum[u][j] - sum[i][j] < x || sum[u][v] - sum[i][v] - (sum[u][j] - sum[i][j]) < x
+                           || sum[u][m] - sum[i][m] - (sum[u][v] - sum[i][v]) < x) continue;
+                        if(sum[n][j] - sum[u][j] < x || sum[n][v] - sum[u][v] - (sum[n][j] - sum[u][j]) < x
+                           || sum[n][m] - sum[u][m] - (sum[n][v] - sum[u][v]) < x) continue;
+//                        cout << "\t " << i << " " << j << " " << u << " " << v << endl;
+                        return true;
                     }
                 }
             }
-//            cout <<endl;
         }
-        ret = 0;
-//        for(i = 1; i <= N; i++) cout << buy[i] << " "; cout << endl;
-        for(i = 1; i <= N; i++) if(buy[i] >= K) ret++;
+        return false;
+    }
+    int findBest (vector <string> ch)
+    {
+        int ret = 0;
+        int i, j, u, v, w;
+        n = ch.size(); m = ch[0].length();
+        memset(a, 0, sizeof(a));
+        memset(sum, 0, sizeof(sum));
+        for(i = 1; i <= n; i++) {
+            for(j = 1; j <= m; j++) {
+                a[i][j] = ch[i - 1][j - 1] - '0';
+                sum[i][j] = sum[i - 1][j] + sum[i][j - 1] - sum[i - 1][j - 1] + a[i][j];
+            }
+        }
+//        for(i = 1; i <= n; i++) {
+//            for(j = 1; j <= m; j++) cout << sum[i][j] << " "; cout << endl;
+//        }
+        int l = 0, r = MOD >> 2, mid;
+        while(l + 1 < r) {
+            mid = (l + r) >> 1;
+//            cout << l << " " << mid << " " << r << " " << check(mid) << endl;
+            if(check(mid)) l = mid;
+            else r = mid - 1;
+        }
+        if(check(r)) return r;
+        else if(check(l)) return l;
         return int(ret);
     }
 };
@@ -193,96 +196,73 @@ namespace moj_harness {
 	int run_test_case(int casenum__) {
 		switch (casenum__) {
 		case 0: {
-			int N                     = 10;
-			int K                     = 2;
-			int s[]                   = {1, 2, 3};
-			int expected__            = 0;
+			string chocolate[]        = {
+"9768",
+"6767",
+"5313"
+};
+			int expected__            = 3;
 
 			std::clock_t start__      = std::clock();
-			int received__            = ShoppingSurveyDiv1().minValue(N, K, vector <int>(s, s + (sizeof s / sizeof s[0])));
+			int received__            = ChocolateDividingEasy().findBest(vector <string>(chocolate, chocolate + (sizeof chocolate / sizeof chocolate[0])));
 			return verify_case(casenum__, expected__, received__, clock()-start__);
 		}
 		case 1: {
-			int N                     = 5;
-			int K                     = 2;
-			int s[]                   = {1, 2, 3};
-			int expected__            = 1;
+			string chocolate[]        = {
+"36753562",
+"91270936",
+"06261879",
+"20237592",
+"28973612",
+"93194784"
+};
+			int expected__            = 15;
 
 			std::clock_t start__      = std::clock();
-			int received__            = ShoppingSurveyDiv1().minValue(N, K, vector <int>(s, s + (sizeof s / sizeof s[0])));
+			int received__            = ChocolateDividingEasy().findBest(vector <string>(chocolate, chocolate + (sizeof chocolate / sizeof chocolate[0])));
 			return verify_case(casenum__, expected__, received__, clock()-start__);
 		}
 		case 2: {
-			int N                     = 4;
-			int K                     = 4;
-			int s[]                   = {4, 4, 4, 2};
-			int expected__            = 2;
+			string chocolate[]        = {
+"012",
+"345",
+"678"
+};
+			int expected__            = 0;
 
 			std::clock_t start__      = std::clock();
-			int received__            = ShoppingSurveyDiv1().minValue(N, K, vector <int>(s, s + (sizeof s / sizeof s[0])));
-			return verify_case(casenum__, expected__, received__, clock()-start__);
-		}
-		case 3: {
-			int N                     = 20;
-			int K                     = 3;
-			int s[]                   = {1, 10, 3, 4, 8, 15, 3, 16, 18, 2, 7, 3};
-			int expected__            = 10;
-
-			std::clock_t start__      = std::clock();
-			int received__            = ShoppingSurveyDiv1().minValue(N, K, vector <int>(s, s + (sizeof s / sizeof s[0])));
-			return verify_case(casenum__, expected__, received__, clock()-start__);
-		}
-		case 4: {
-			int N                     = 4;
-			int K                     = 2;
-			int s[]                   = {1, 2, 1, 1, 3, 1, 2, 2, 1, 2, 1};
-			int expected__            = 2;
-
-			std::clock_t start__      = std::clock();
-			int received__            = ShoppingSurveyDiv1().minValue(N, K, vector <int>(s, s + (sizeof s / sizeof s[0])));
-			return verify_case(casenum__, expected__, received__, clock()-start__);
-		}
-		case 5: {
-			int N                     = 2;
-			int K                     = 3;
-			int s[]                   = {1, 1, 1, 2};
-			int expected__            = 1;
-
-			std::clock_t start__      = std::clock();
-			int received__            = ShoppingSurveyDiv1().minValue(N, K, vector <int>(s, s + (sizeof s / sizeof s[0])));
+			int received__            = ChocolateDividingEasy().findBest(vector <string>(chocolate, chocolate + (sizeof chocolate / sizeof chocolate[0])));
 			return verify_case(casenum__, expected__, received__, clock()-start__);
 		}
 
 		// custom cases
 
-      case 6: {
-			int N                     = 3;
-			int K                     = 1;
-			int s[]                   = {1, 2};
-			int expected__            = 2;
+      case 3: {
+			string chocolate[]        = {
+"993",			
+"939",
+"299"
+			};
+			int expected__            = 3;
 
 			std::clock_t start__      = std::clock();
-			int received__            = ShoppingSurveyDiv1().minValue(N, K, vector <int>(s, s + (sizeof s / sizeof s[0])));
+			int received__            = ChocolateDividingEasy().findBest(vector <string>(chocolate, chocolate + (sizeof chocolate / sizeof chocolate[0])));
 			return verify_case(casenum__, expected__, received__, clock()-start__);
 		}
-/*      case 7: {
-			int N                     = ;
-			int K                     = ;
-			int s[]                   = ;
+/*      case 4: {
+			string chocolate[]        = ;
 			int expected__            = ;
 
 			std::clock_t start__      = std::clock();
-			int received__            = ShoppingSurveyDiv1().minValue(N, K, vector <int>(s, s + (sizeof s / sizeof s[0])));
+			int received__            = ChocolateDividingEasy().findBest(vector <string>(chocolate, chocolate + (sizeof chocolate / sizeof chocolate[0])));
 			return verify_case(casenum__, expected__, received__, clock()-start__);
 		}*/
-/*      case 8: {
-			int N                     = ;
-			int K                     = ;
-			int s[]                   = ;
+/*      case 5: {
+			string chocolate[]        = ;
 			int expected__            = ;
 
 			std::clock_t start__      = std::clock();
-			int received__            = ShoppingSurveyDiv1().minValue(N, K, vector <int>(s, s + (sizeof s / sizeof s[0])));
+			int received__            = ChocolateDividingEasy().findBest(vector <string>(chocolate, chocolate + (sizeof chocolate / sizeof chocolate[0])));
 			return verify_case(casenum__, expected__, received__, clock()-start__);
 		}*/
 		default:
