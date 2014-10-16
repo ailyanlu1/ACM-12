@@ -822,6 +822,7 @@
 
 *	倍增算法
 
+	//改bfs
 	验题: POJ1330,     
 
 		//LCA O(nlogn)
@@ -880,7 +881,8 @@
 		
 		void solveLCA() {
 		    int i, j, root = 1;
-		    fa[0][root] = 1;
+			for(i = 0; i <= n; i++) depth[i] = -1;
+		    fa[0][root] = root;
 		    depth[root] = 0;
 		    dfsLCA(root);
 		    for (i = 1; i < 16; i++)
