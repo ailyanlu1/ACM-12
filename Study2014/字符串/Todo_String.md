@@ -35,6 +35,28 @@
 		22458671, 44917381, 89834777, 179669557, 359339171, 
 		718678369, 1437356741, 2147483647
 
+*	字符串区间Hash
+
+		//存储在H数组中, 利用溢出进行Hash
+		void preHash(int len, char str[], LL H[], LL prePow[]) {
+		    int i;
+			//prePow预处理MOD^x的值, 可以在程序最开始做!
+		    prePow[0] = 1;
+		    for(i = 1; i <= len; i++) {
+		        prePow[i] = prePow[i - 1] * MOD;
+		    }
+		    H[0] = str[0];
+		    for(i = 1; i < len; i++) {
+		        H[i] = (H[i - 1] * MOD + str[i]);
+		    }
+		}
+		//求区间[l,r]的Hash值
+		LL HASH(int l, int r, LL H[], LL prePow[]) {
+		    LL ret = 0;
+		    if(l) ret = H[l - 1] * prePow[r - l + 1];
+		    return (H[r] - ret);
+		}
+
 ####    02. **KMP**  
 
 *	函数版
