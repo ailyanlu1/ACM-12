@@ -290,6 +290,205 @@
 
 >   斯坦纳树 
 
+>	最优比例生成树
+
+	double prim (double s) {
+	    clr (vis , 0);
+	    double retdis = 0;
+	    int retcost = 0;
+	    vis[1] = 1;
+	    for (int i = 2 ; i <= n ; i++) {
+	        lowcost[i] = abs (v[1].h - v[i].h) - s * dis[1][i];
+	        closest[i] = 1;
+	    }
+	    for (int num = 0 ; num < n - 1 ; num++) {
+	        double minans = inf;
+	        int u;
+	        for (int i = 1 ; i <= n ; i++) {
+	            if (vis[i]) continue;
+	            if (lowcost[i] < minans) {
+	                minans = lowcost[i];
+	                u = i;
+	            }
+	        }
+	        vis[u] = 1;
+	        retcost += abs (v[closest[u]].h - v[u].h);
+	        retdis += dis[closest[u]][u];
+	        for (int i = 1 ; i <= n ; i++) {
+	            double cal = abs (v[u].h - v[i].h) - s * dis[u][i];
+	            if (!vis[i] &&cal < lowcost[i]) {
+	                lowcost[i] = cal;
+	                closest[i] = u;
+	            }
+	        }
+	    }
+	    return 1.0 * retcost / retdis;
+	}
+	int main() {
+	    double ans = 0;
+	    while (1) {
+	        double tmp = prim (ans);
+	        if (fabs (tmp - ans) < eps) {
+	            break;
+	        }
+	        ans = tmp;
+	    }
+	    printf ("%.3f\n" , ans);
+	}
+
+>	度限制最小生成树
+
+
+	就是图中的某些点在生成树时有度的限制，找满足这些约束的最小生成树。如果所有点都有度限制，那么这个问题将是NP难题），具体算法如下： 1. 先求出最小 m 度限制生成树：原图中去掉和 V0 相连的所有边（可以事先存两个图， Ray 的方法是一个邻接矩阵，一个邻接表，用方便枚举边的邻接表来构造新图），得到 m 个连通分量，则这 m 个连通分量必须通过 v0 来连接，所以，在图 G 的所有生成树中 dT (v0) ≥m 。也就是说，当 k<m 时，问题无解。对每个连通分量求一次最小生成树（哪个算法都行），对于每个连通分量 V’ ，用一条与 V0 直接连接的最小的边把它与 V0 点连接起来，使其整体成为一个生成树。于是，我们就得到了一个 m 度限制生成树，不难证明，这就是最小 m 度限制生成树。 2. 由最小 m 度限制生成树得到最小 m+1 度限制生成树;
+	：连接和 V0 相邻的点 v ，则可以知道一定会有一个环出现（因为原来是一个生成树），只要找到这个环上的最大权边（不能与 v0 点直接相连）并删除，就可以得到一个 m+1 度限制生成树，枚举所有和 V0 相邻点 v ，找到替换后，增加权值最小的一次替换 (当然，找不到这样的边时，就说明已经求出) ，就可以求得 m+1 度限制生成树。。如果每添加一条边，都需要对环上的边一一枚举，时间复杂度将比较高（但这个题数据比较小，所以这样也没问题，事实上，直接枚举都能过这个题），这里，用动态规划解决。设 Best (v) 为路径 v0—v 上与 v0 无关联且权值最大的边。定义 father (v) 为 v 的父结点，由此可以得到动态转移方程： Best (v) =max (Best (father (v) ),ω (father (v),v) ) ，边界条件为 Best[v0]=-∞ (因为我们每次寻找的是最大边，所以 -∞ 不会被考虑) ，Best[v’]=-∞| (v0,v’) ∈E (T) 。 3. 当 dT (v0) =k 时停止 (即当 V0 的度为 k 的时候停止) ，但不一定 k 的时候最优。 接下来说一下算法的实现： 采用并查集+ kruskal 代码量还少一点。 首先， 每个连通分量的的最小生成树可以直接用一个循环，循环着 Kruskal 求出。这里利用了联通分量间的独立性，对每个连通分量分别求最小生成树，和放在一起求，毫不影响。而且kruskral算法保证了各连通分量边的有序性。 找最小边的时候，上面讲的动态规划无疑是一种好方法，但是也可以这么做： 先走一个循环，但我们需要逆过来加边，将与v0关联的所有边从小到达排序，然后将各连通分量连接起来，利用并查集可以保证每个连通分量只有一条边与v0相连，由于边已经从小到达排序，故与每个连通分量相连的边就是每个连通分量与v0相连中的最小边。 然后求 m+1 度的最小生成树时，可以直接用 DFS ，最小生成树要一直求到 k 度，然后从中找出一个最优值。 int vis[MAXN];
+
+	int lowcost[MAXN];
+	int best[MAXN];
+	int pre[MAXN];
+	int n , k , ans , cnt;
+	int g[MAXN][MAXN];
+	int edge[MAXN][MAXN];
+	int fa[MAXN];
+	int mark[MAXN];
+	map <string ,int> m;
+	void init() {
+	    clr (g , 0x3f);
+	    cnt = 1;
+	}
+	void dfs (int s) {
+	    for (int i = 1 ; i <= cnt ; i++) {
+	        if (mark[i] && edge[s][i]) {
+	            mark[i] = 0;
+	            fa[i] = s;
+	            dfs (i);
+	        }
+	    }
+	}
+	int prim (int s) {
+	    clr (mark , 0);
+	    int sum , pos;
+	    vis[s] = mark[s] = 1;
+	    sum = 0;
+	    for (int i = 1 ; i <= cnt ; i++) {
+	        lowcost[i] = g[s][i];
+	        pre[i] = s;
+	    }
+	    for (int i = 1 ; i <= cnt ; i++) {
+	        pos = -1;
+	        for (int j = 1 ; j <= cnt ; j++) {
+	            if (!vis[j] && !mark[j]) {
+	                if (pos == -1 || lowcost[pos] > lowcost[j]) {
+	                    pos = j;
+	                }
+	            }
+	        }
+	        if (pos == -1) break;
+	        vis[pos] = mark[pos] = 1;
+	        edge[pre[pos]][pos] = edge[pos][pre[pos]] = 1;
+	        sum += g[pre[pos]][pos];
+	        for (int j = 1 ; j <= cnt ; j++) {
+	            if (!vis[j] && !mark[j]) {
+	                if (lowcost[j] > g[pos][j]) {
+	                    lowcost[j] = g[pos][j];
+	                    pre[j] = pos;
+	                }
+	            }
+	        }
+	    }
+	    int minedge = inf;
+	    int root = -1;
+	    for (int i = 1 ; i <= cnt ; i++) {
+	        if (mark[i] && g[i][1] < minedge) {
+	            minedge = g[i][1];
+	            root = i;
+	        }
+	    }
+	    mark[root] = 0;
+	    dfs (root);
+	    fa[root] = 1;
+	    return sum + minedge;
+	}
+	int Best (int s) {
+	    if (fa[s] == 1) return -1;
+	    if (best[s] != -1) return best[s];
+	    int tmp = Best (fa[s]);
+	    if (tmp != -1 && g[fa[tmp]][tmp] > g[fa[s]][s]) {
+	        best[s] = tmp;
+	    } else best[s] = s;
+	    return best[s];
+	}
+	
+	void solve() {
+	    clr (vis , 0);
+	    clr (fa , -1);
+	    clr (edge , 0);
+	    vis[1] = 1;
+	    int num = 0;
+	    ans = 0;
+	    for (int i = 1 ; i <= cnt ; i++) {
+	        if (!vis[i]) {
+	            num++;
+	            ans += prim (i);
+	        }
+	    }
+	    int minadd , change;
+	    for (int i = num + 1 ; i <= k && i <= cnt; i ++) {
+	        clr (best , -1);
+	        for (int j = 1 ; j <= cnt ; j++) {
+	            if (fa[j] != 1 && best[j] == -1) {
+	                Best (j);
+	            }
+	        }
+	        minadd = inf;
+	        for (int j = 1 ; j <= cnt ; j++) {
+	            if (g[1][j] != inf && fa[j] != 1) {
+	                int a = best[j];
+	                int b = fa[best[j]];
+	                int tmp = g[1][j] - g[a][b];
+	                if (minadd > tmp) {
+	                    minadd = tmp;
+	                    change = j;
+	                }
+	            }
+	        }
+	        if (minadd >= 0) break;
+	        ans += minadd;
+	        int a = best[change];
+	        int b = fa[best[change]];
+	        g[a][b] = g[b][a] = inf;
+	        fa[a] = 1;
+	        g[1][a] = g[a][1] = g[change][1];
+	        g[1][change] = g[change][1] = inf;
+	    }
+	}
+	int main() {
+	    m.clear();
+	    m["Park"] = 1;
+	    init();
+	    scanf ("%d" , &n);
+	    string str1 , str2;
+	    int v;
+	    for (int i = 0 ; i < n ; i++) {
+	        cin >> str1 >> str2;
+	        scanf ("%d" , &v);
+	        int a = m[str1];
+	        int b = m[str2];
+	        if (!a) {
+	            m[str1] = a = ++cnt;
+	        }
+	        if (!b) {
+	            m[str2] = b = ++cnt;
+	        }
+	        if (g[a][b] > v) g[a][b] = g[b][a] = v;
+	    }
+	    scanf ("%d" , &k);
+	    solve();
+	    printf ("Total miles driven: %d\n" , ans);
+	    19
+	    return 0;
+	}
+
+
 >	生成树计数
 
 	Matrix-Tree定理(Kirchhoff矩阵-树定理)   
@@ -381,7 +580,46 @@
 	    }
 	    return ret % MOD;
 	}
-		
+	
+>	生成树相关问题	
+
+
+	// 生成树相关的一些问题 By 猛犸也钻地 @ 2012.02.24
+	
+	/* 度限制生成树 //
+	Q: 求一个最小生成树，其中V0连接的边不能超过K个或只能刚好K个
+	1. 去掉所有和V0连接的边，对每个连通分量求最小生成树
+	2. 如果除去点V0外共有T个连通分量，且T>K，无解
+	3. 于是现在有一个最小T度生成树，然后用dp[V]计算出该点到V0的路径上
+	   权值最大的边是多少，再枚举和V0连接的没有使用过的边，找出一条边
+	   使得用那条边替换已有的边，增加的权值最小，不停替换直到V0出度为K */
+	
+	/* 次小生成树 //
+	Q: 求一个次小生成树，要求权值之和必须大于等于或严格大于其最小生成树
+	1. 求最小生成树
+	2. 找一个根然后dp，求出每个点往上走2^L能到达的祖先是谁，以及
+	   这段路径上的最大边和次大边(如果仅要求大于等于的话就不需要次大边)
+	3. 枚举没有使用过的边，利用上面得到的信息，在O(logN)时间内对每条边
+	   计算出其能够替换的已有的最大和次大边，然后找出最佳替换方式 */
+	
+	/* 斯坦纳树 //
+	Q: 求一个包含指定的K个特殊点的最小生成树，其他点不一定在树中
+	1. 用dp[mask][x]记录树根在点x，mask所对应的特殊点集在树中的最小权值之和
+	2. 将dp[][]初始化为正无穷，只有dp[1<<i][Ai]被初始化为0，Ai为第i个特殊点
+	3. 先求出所有点对间最短路，然后枚举mask，依次做两种转移：
+	3.1. 枚举x和mask的子集sub，合并两棵子树
+	     dp[mask][x]=min(dp[mask][x],dp[sub][x]+dp[mask^sub][x])
+	3.2. 枚举x和y，计算结点从y移动到x的花费
+	     dp[mask][x]=min(dp[mask][x],dp[mask][y]+minDistance(y,x))
+	     在上面的转移中，也可以把这些点同时放到队列里，用spfa更新最短路 */
+	
+	/* 生成树计数 //
+	Q: 给定一个无权的无向图G，求生成树的个数
+	1. 令矩阵D[][]为度数矩阵，其中D[i][i]为结点i的度，其他位置的值为0
+	2. 令矩阵A[][]为邻接矩阵，当结点i和j之间有x条边时，D[i][j]=D[j][i]=x
+	3. 令矩阵C=D-A，矩阵C'为矩阵C抽去第k行和第k列后的一个n-1阶的子矩阵
+	   其中k可以任意设定，构造完C'后，生成树的个数即为C'行列式的值 */
+
 ####    02.	*最短路*  
 
 >	floyd  
@@ -395,6 +633,57 @@
 	deque判当前节点和队首节点可以被三角形数据cha  
 
 	priority_queue优化(本质dijkstra靠谱!)
+	
+>	最短路次短路计数
+
+	void dij() {
+	    clr (cnt , 0);
+	    clr (vis , 0);
+	    for (int i = 0 ; i <= n ; i++) {
+	        dis[i][0] = inf;
+	        dis[i][1] = inf;
+	    }
+	    dis[st][0] = 0;
+	    cnt[st][0] = 1;
+	    for (int i = 1 ; i <= 2 * n ; i++) {
+	        int tmp = inf , tx = -1 , flag;
+	        for (int j = 1 ; j <= n ; j++) {
+	            if (!vis[j][0] && dis[j][0] < tmp) {
+	                tmp = dis[j][0];
+	                tx = j;
+	                flag = 0;
+	            } else
+	                if (!vis[j][1] && dis[j][1] < tmp) {
+	                    tmp = dis[j][1];
+	                    tx = j;
+	                    flag = 1;
+	                }
+	        }
+	        if (tx == -1) break;
+	        13
+	        vis[tx][flag] = 1;
+	        for (int j = head[tx] ; ~j ; j = e[j].next) {
+	            int v = e[j].v , c = e[j].c;
+	            if (dis[tx][flag] + c < dis[v][0]) {
+	                dis[v][1] = dis[v][0];
+	                cnt[v][1] = cnt[v][0];
+	                dis[v][0] = dis[tx][flag] + c;
+	                cnt[v][0] = cnt[tx][flag];
+	            } else
+	                if (dis[tx][flag] + c == dis[v][0]) {
+	                    cnt[v][0] += cnt[tx][flag];
+	                } else
+	                    if (dis[tx][flag] + c == dis[v][1]) {
+	                        cnt[v][1] += cnt[tx][flag];
+	                    } else
+	                        if (dis[tx][flag] + c < dis[v][1]) {
+	                            dis[v][1] = dis[tx][flag] + c;
+	                            cnt[v][1] = cnt[tx][flag];
+	                        }
+	        }
+	    }
+	}
+
 
 >	K短路  
 
@@ -1215,6 +1504,462 @@
 
 
 ####    10. **2 SAT**  
+
+>	综述
+
+    	综述：每个条件的形式都是x[i]为真/假或者x[j]为真/假， 每个x[i]拆成2*i和2*i+1两个点，分别表示x[i]为真，x[i] 为假；加的每一条边之间的关系是and 模型一：两者（A，B）不能同时取（但可以两个都不选） 说明：A 为假或 B 为假 那么选择了 A 就只能选择 B’，选择了 B 就只能选择 A’ 连边 A→B’，B→A’ 模型二：两者（A，B）不能同时不取（但可以两个都选） 说明：A 为真或 B 为真 那么选择了 A’就只能选择 B，选择了 B’就只能选择 A 连边 A’→B，B’→A 模型三：两者（A，B）要么都取，要么都不取 说明：...... 那么选择了 A，就只能选择 B，选择了 B 就只能选择 A，选择了 A’就只能选择 B’， 选择了 B’就只能选择 A’ 连边 A→B，B→A，A’→B’，B’→A’ 模型四：两者（A，A’）必取A 那么，那么，该怎么说呢？先说连边吧。 连边 A’→A 模型五（补充） ：两者（A，B）两个必须不相同，即要么选A，要么选B 逻辑表达：A||B 非 A||非 B 连边：A 为真或 B 为真： A’--->B B’--->A;
+    	29
+    	A 为假或 B 为假: A-->B’ B-->A 说明：A 或 B，非 A 或非 B，前者表示两者至少有一个 true，后者表示至少有一个 false
+
+>    判断可行性
+
+    建图，求强连通，判断任意对象的两部是否属于同一强连通：
+    
+>    求任意解
+
+    方法是，对原图求一次强连通分量，然后看每组中的两个点是否属于同一个强连通分量，如果存在这种情况，那么无解
+    然后对于缩点后的图G'，我们将G'中所有边转置。进行拓扑排序。
+       对于缩点后的所有点，我们先预处理求出所有冲突顶点。例如缩点后Ai所在强连通分支的ID为id[ Ai] ，同理~Ai在 id[~Ai], 所以冲突顶点
+        conflict[ id[Ai] ]=conflict[ id[~Ai] ];
+    同理conflict[ id[~Ai] ]=conflict[ id[Ai] ];
+        设缩点后有Nscc个点。
+        然后对拓扑序进行染色，初始化所有点color均为未着色
+        顺序遍历得到的拓扑序列，对于未着色的点x，将x染成红色，同时将所有与x矛盾的点conflic[x]染成蓝色。
+    2-sat的一组解就等价于所有缩点后点颜色为红色的点，也就是color[ id[i] ]=RED的所有点
+    缩点
+    　　Tarjan算法缩点，将所有的边反过来（ 为什么？后面有嗯 ）
+    判可行
+    　　枚举集合的两个元素，看其是否处于不同的块内，若否的话则给出不可行信息
+    记录矛盾
+    　　这里所说的矛盾不是题中给出的两个人之间有仇恨，那样的边是实际存在，我们这里说的矛盾是指若两个块分别含有两个对立节点，也就是说一个集合的两个元素分布在了两个不同的块中，那么这两个块就是矛盾的，即不可能同时被选择，这样一种矛盾关系是不存在于边中的，是不依赖于输入的数据的，我们要找到与一个块对立的块，并把它们保存下来。
+    拓扑排序
+    　　将缩点后的图进行拓扑排序（排的是块而不是节点）
+    构造方案
+    　　按照拓扑序列的顺序，依次访问所有块，若一个块未被标记，将其标记为“选择”，不传递“选择”标记，将被选块的对立块标记为“不选择”，将其“不选择”标记沿着边正向传递。（ 不是逆着边么？哼，图已经被反过来了，你到底有没有认真看呐！囧 ）
+    /*2-sat*/
+    #define Maxn 5010
+    vector<VI> e, ne;
+    
+    
+    int dfn[Maxn], low[Maxn], block[Maxn], sta[Maxn], top, tsp, N;
+    int sta1[Maxn], rid[Maxn], top1; //rid 新旧图映射，sta1, top1 拓扑排序，输出路径
+    /*初始化 top = tsp = N = 0 和 block为 -1, dfn 为 0*/
+    void tarjan(int u, int root) {
+        dfn[u] = low[u] = ++ tsp;
+        sta[top ++ ] = u;
+        for (int i = 0; i < e[u].size(); i ++ ) {
+            int v = e[u][i];
+            if (!dfn[v]) tarjan(v, root);
+            if (dfn[v] < dfn[root]) continue;
+            low[u] = min(low[u], low[v]);
+        }
+        if (low[u] == dfn[u]) {
+            int v;
+            do {
+                v = sta[ -- top];
+                block[v] = N;
+            } while (v != u);
+            rid[N] = u;
+            sta1[top1 ++ ] = N;
+            N ++ ;
+        }
+    }
+    int color[Maxn];
+    void colorBlue(int u) {
+        color[u] = 2;
+        for (int i = 0; i < ne[u].size(); i ++ ) {
+            int v = ne[u][i];
+            if (!color[v])
+                colorBlue(v);
+        }
+    }
+    bool twoSat(int n) {
+        memset(dfn, 0, sizeof(dfn));
+        memset(block, -1, sizeof(block));
+        top1 = top = N = tsp = 0;
+        for (int i = 0; i < n * 2; i ++ )
+            if (!dfn[i])
+                tarjan(i, i);
+    
+    
+        for (int i = 0; i < n * 2; i += 2 )
+            if (block[i] == block[i ^ 1])
+                return 0;
+        //return 1;
+        /*建立新图*/
+        ne.clear();
+        for (int i = 0; i < N; i ++ ) {
+            VI p;
+            ne.PB(p);
+        }
+        for (int i = 0; i < n * 2; i ++ )
+            for (int j = 0; j < e[i].size(); j ++ )
+                if (block[i] != block[e[i][j]])
+                    ne[block[e[i][j]]].PB(block[i]); //反向建图
+        
+        memset(color, 0, sizeof(color));
+        for (int i = 0; i < top1; i ++ ) {
+            int x = sta1[i];
+            if (!color[x]) {
+                color[x] = 1;
+                x = block[rid[x] ^ 1];
+                colorBlue(x);
+            }
+        }
+        return 1;
+    }
+
+
+>	输出任一解
+
+	//POJ3648
+	#define Maxn 411
+	#define Maxm 411111
+	/*
+	 *   SCC 使用图struct
+	 */      
+	struct GRAPH {
+	    struct node {
+	        int u, v, next;
+	    }adj[Maxm];
+	    int tot, last[Maxn];
+	    void init(int n) {
+	        for(int i = 0; i <= n; i++) last[i] = -1;
+	        tot = 0;
+	    }
+	    void adde(int u, int v) {
+	//        cout << "adde " << u << "-->" << v << endl;
+	        adj[tot].u = u; adj[tot].v = v; 
+	        adj[tot].next = last[u]; last[u] = tot++;
+	    }
+	}e, e1;
+	int dfn[Maxn], low[Maxn], belong[Maxn], instack[Maxn], ncnt, nindex;
+	stack<int> sta;
+	int rid[Maxn], sta1[Maxn], top1; //rid 新旧图映射，sta1拓扑排序，输出路径
+	void Tarjan(int u) {
+	    int j, v;
+	    dfn[u] = low[u] = nindex++;
+	    sta.push(u);
+	    instack[u] = 1;
+	    for(j = e.last[u]; ~j; j = e.adj[j].next) {
+	        v = e.adj[j].v;
+	        if(-1 == dfn[v]) {
+	            Tarjan(v);
+	            if(low[u] > low[v]) low[u] = low[v];
+	        }
+	        else if(instack[v] && dfn[v] < low[u]) {
+	            low[u] = dfn[v];
+	        }
+	    }
+	    if(dfn[u] == low[u]) {
+	        do {
+	            v = sta.top();
+	            sta.pop();
+	            instack[v] = 0;
+	            belong[v] = ncnt;
+	        }while(u != v);
+	        rid[ncnt] = u;
+	        sta1[top1++] = ncnt;
+	        ncnt++;
+	    }
+	}
+	
+	int color[Maxn];
+	void colorBlue(int u) {
+	    int j, v;
+	    color[u] = 2;
+	    for(j = e1.last[u]; j != -1; j = e1.adj[j].next) {
+	        v = e1.adj[j].v;
+	        if(!color[v]) colorBlue(v);
+	    }
+	}
+	void buildGraph() {
+	    int i, j, u, v, x, y;
+	    e1.init(ncnt);
+	    for(j = 0; j < e.tot; j++) {
+	        x = belong[u = e.adj[j].u];
+	        y = belong[v = e.adj[j].v];
+	        if(x != y) {
+	            e1.adde(y, x);//反向建图
+	        }
+	    }
+	}
+	int twoSat(int n) {
+	    int i, u, v, flag = 0;
+	    memset(dfn, -1, sizeof(dfn));
+	    memset(low, -1, sizeof(low));
+	    memset(instack, 0, sizeof(instack));
+	    memset(belong, -1, sizeof(belong));
+	    ncnt = 0; //缩点, 新点[0,ncnt)
+	    nindex = 1;
+	    top1 = 0;
+	    for(i = 0; i < 2*n; i++) {
+	        if(-1 == dfn[i]) {
+	            while(!sta.empty()) sta.pop();
+	            Tarjan(i);
+	        }
+	    }
+	//    for(i = 0; i < 2 * n; i++) cout << i << " ~ " << belong[i] << endl;
+	    for(i = 0; i < 2 * n; i += 2) {
+	        if(belong[i] == belong[i ^ 1]) return false;
+	    }
+	    //建新图
+	    buildGraph();
+	    memset(color, 0, sizeof(color));
+	    for(i = 0; i < top1; i++) {
+	        u = sta1[i];
+	        if(!color[u]) {
+	            color[u] = 1;
+	            v = belong[rid[u] ^ 1];
+	            colorBlue(v);
+	        }
+	    }
+	    return 1;
+	}
+	int n, m;
+	char cu, cv;
+	int main() {
+	    int i, j, u, v, w, x, y;
+	    //freopen("", "r", stdin);
+	    //freopen("", "w", stdout);
+	    while(scanf("%d%d", &n, &m) != EOF) {
+	        if(n == 0 && m == 0) break;
+	        e.init(4 * n);
+	        for(i = 0; i < m; i++) {
+	            scanf("%d%c%d%c", &u, &cu, &v, &cv);
+	            if(cu == 'w') u <<= 1;
+	            else u=(u<<1)|1;
+	            if(cv == 'w') v <<= 1;
+	            else v=(v<<1)|1;
+	            if(u != (v ^ 1)) {
+	                e.adde(u, v ^ 1);
+	                e.adde(v, u ^ 1);
+	            }
+	        }
+	        e.adde(0, 1);
+	        if(!twoSat(n)) {
+	            printf("bad luck\n");
+	        }
+	        else {
+	            for(i = 1; i < n; i++) {
+	                if(i > 1)printf(" ");
+	                if(color[belong[i<<1]] == 1) {
+	                    printf("%dh", i);
+	                }
+	                else printf("%dw", i);
+	            }
+	            printf("\n");
+	        }
+	    }
+	    return 0;
+	}
+	
+	/*
+	2 3
+	0w 1h
+	1w 0h
+	0h 1h
+	
+	10 6
+	3h 7h
+	5w 3w
+	7h 6w
+	8w 3w
+	7h 3w
+	2w 5h
+	0 0
+	*/
+
+
+>	输出任意解from XMZhou
+
+
+	struct Edge {
+	    int v,next;
+	} e[MAXE];
+	int head[MAXN],num;
+	void init() {
+	    num = 0;
+	    memset (head,-1,sizeof (head) );
+	}
+	void addedge (int u,int v) {
+	    e[num].v = v;
+	    e[num].next = head[u];
+	    head[u] = num++;
+	}
+	int Low[MAXN],DFN[MAXN],Stack[MAXN],Belong[MAXN];//Belong数组的值1~scc
+	int Index,top;
+	int scc;
+	bool Instack[MAXN];
+	void Tarjan (int u) {
+	    int v;
+	    Low[u] = DFN[u] = ++Index;
+	    Stack[top++] = u;
+	    Instack[u] = true;
+	    for (int i = head[u]; i != -1; i = e[i].next) {
+	        v = e[i].v;
+	        if ( !DFN[v] ) {
+	            Tarjan (v);
+	            if (Low[u] > Low[v]) Low[u] = Low[v];
+	        } else
+	            if (Instack[v] && Low[u] > DFN[v]) Low[u] = DFN[v];
+	    }
+	    if (Low[u] == DFN[u]) {
+	        scc++;
+	        do {
+	            v = Stack[--top];
+	            Instack[v] = false;
+	            Belong[v] = scc;
+	        } while (v != u);
+	    }
+	}
+	bool solvable (int n) { //n是总个数,需要选择一半
+	    memset (DFN,0,sizeof (DFN) );
+	    memset (Instack,false,sizeof (Instack) );
+	    Index = scc = top = 0;
+	    for (int i = 0; i < n; i++) if (!DFN[i]) Tarjan (i);
+	    for (int i = 0; i < n; i += 2) {
+	        if (Belong[i] == Belong[i^1]) return false;    //************************************************* //拓扑排序求任意一组解部分
+	    }
+	    return true;
+	}
+	queue<int>q1,q2;
+	vector<vector<int> > dag;//缩点后的逆向DAG图
+	char color[MAXN];//染色，为'R'是选择的
+	int indeg[MAXN];//入度
+	int cf[MAXN];
+	void solve (int n) {
+	    dag.assign (scc+1,vector<int>() );
+	    memset (indeg,0,sizeof (indeg) );
+	    memset (color,0,sizeof (color) );
+	    for (int u = 0; u < n; u++) for (int i = head[u]; i != -1; i = e[i].next) {
+	            int v = e[i].v;
+	            if (Belong[u] != Belong[v]) {
+	                dag[Belong[v]].push_back (Belong[u]);
+	                indeg[Belong[u]]++;
+	            }
+	        }
+	    for (int i = 0; i < n; i += 2) {
+	        cf[Belong[i]] = Belong[i^1];
+	        cf[Belong[i^1]] = Belong[i];
+	    }
+	    while (!q1.empty() ) q1.pop();
+	    while (!q2.empty() ) q2.pop();
+	    for (int i = 1; i <= scc; i++) if (indeg[i] == 0) q1.push (i);
+	    while (!q1.empty() ) {
+	        int u = q1.front();
+	        q1.pop();
+	        if (color[u] == 0) {
+	            color[u] = 'R';
+	            color[cf[u]] = 'B';
+	        }
+	        int siz = dag[u].size();
+	        for (int i = 0; i < siz; i++) {
+	            indeg[dag[u][i]]--;
+	            if (indeg[dag[u][i]] == 0) q1.push (dag[u][i]);
+	        }
+	    }
+	}
+	int change (char s[]) {
+	    int ret = 0;
+	    int i = 0;
+	    while (s[i]>='0' && s[i]<='9') {
+	        ret *= 10;
+	        ret += s[i]-'0';
+	        i++;
+	    }
+	    if (s[i] == 'w') return 2*ret;
+	    else return 2*ret+1;
+	}
+	int main() {
+	    int n,m;
+	    char s1[10],s2[10];
+	    while (scanf ("%d%d",&n,&m) == 2) {
+	        if (n == 0 && m == 0) break;
+	        init();
+	        while (m--) {
+	            scanf ("%s%s",s1,s2);
+	            int u = change (s1);
+	            int v = change (s2);
+	            addedge (u^1,v);
+	            addedge (v^1,u);
+	        }
+	        addedge (1,0);
+	        if (solvable (2*n) ) {
+	            solve (2*n);
+	            for (int i = 1; i < n; i++) { //注意这一定是判断
+	                color[Belong[ if (color[Belong[2*i]] == 'R') printf ("%dw",i);
+	                              else printf ("%dh",i);
+	                              if (i < n-1) printf (" ");
+	                              else printf ("\n");
+	            }
+	        } else printf ("bad luck\n");
+	    }
+	    return 0;
+	}
+
+
+
+>    求字典序最小的解
+
+    也就是说，沿着一条路径，如果一个点被选择了，那么这条路径以后的点都将被选择，那么，出现不可行的情况就是，存在一个党派两个党员都被选择了，那么，我们只需要枚举一下就可以了，数据不大，答案总是可以出来的。
+    这么一个简单的算法，放在第一个说，看来你已经知道它不是重点了，但是，若题目要求的是字典序最小的方案的话，那就只能选择这个算法了。
+
+    //求字典序最小解
+    struct Edge {
+        int v,next;
+    } e[MAXE];
+    int head[MAXN],tot;
+    void init() {
+        tot = 0;
+        memset (head,-1,sizeof (head) );
+    }
+    void addedge (int u,int v) {
+        e[tot].v = v;
+        e[tot].next = head[u];
+        head[u] = tot++;
+    }
+    bool vis[MAXN];//染色标记，为true表示选择
+    int S[MAXN],top;//栈
+    bool dfs (int u) {
+        if (vis[u^1]) return false;
+        if (vis[u]) return true;
+        vis[u] = true;
+        S[top++] = u;
+        for (int i = head[u]; i != -1; i = e[i].next) if (!dfs (e[i].v) ) return false;
+        return true;
+    }
+    bool Twosat (int n) {
+        memset (vis,false,sizeof (vis) );
+        for (int i = 0; i < n; i += 2) {
+            if (vis[i] || vis[i^1]) continue;
+            top = 0;
+            if (!dfs (i) ) {
+                while (top) vis[S[--top]] = false;
+                if (!dfs (i^1) ) return false;
+            }
+        }
+        return true;
+    }
+    int main() {
+        int n,m;
+        int u,v;
+        while (scanf ("%d%d",&n,&m) == 2) {
+            init();
+            30
+            while (m--) {
+                scanf ("%d%d",&u,&v);
+                u--;
+                v--;
+                addedge (u,v^1);
+                addedge (v,u^1);
+            }
+            if (Twosat (2*n) ) {
+                for (int i = 0; i < 2*n; i++) if (vis[i]) printf ("%d\n",i+1);
+            } else printf ("NIE\n");
+        }
+        return 0;
+    }
 
 
 
@@ -2493,9 +3238,56 @@
 
 ####    22. **最大团**  
 
-*   最大团
+>   最大团
 
-*   极大团计数
+	bool am[100][100];
+	int ans;
+	int c[100];
+	int U[100][100];
+	int n;
+	bool dfs(int rest,int num) {
+	  if (!rest) {
+	    if (num>=ans)
+	      return 1;
+	    else
+	      return 0;
+	  }
+	  int pre=-1;
+	  for (int i=0; i<rest && rest-i+num>=ans; i++) {
+	    int idx=U[num][i];
+	    if (num+c[idx]<ans)
+	      return 0;
+	    int nrest=0;
+	    for (int j=i+1; j<rest; j++)
+	      if (am[idx][U[num][j]])
+	        U[num+1][nrest++]=U[num][j];
+	    if (dfs(nrest,num+1))
+	      return 1;
+	  }
+	  return 0;
+	}
+	int main() {
+	  while (scanf("%d",&n),n) {
+	    for (int i=0; i<n; i++)
+	      for (int j=0; j<n; j++)
+	        scanf("%d",&am[i][j]);
+	    ans=0;
+	    for (int i=n-1; i>=0; i--) {
+	      int rest=0;
+	      for (int j=i+1; j<n; j++)
+	        if (am[i][j])
+	          U[0][rest++]=j;
+	      ans+=dfs(rest,0);
+	      c[i]=ans;
+	    }
+	    printf("%d\n",ans);
+	  }
+	  return 0;
+	}
+	
+
+
+>   极大团计数
 
 
 ####     23. **斯坦纳树**  
@@ -2509,7 +3301,41 @@
 
 ####    25. **弦图完美消除序列**  
 
+>	// 弦图与区间图 By 猛犸也钻地 @ 2012.09.13
 
+	/* 相关定义 //
+	1. 子图：原图点集的子集+原图边集的子集
+	2. 诱导子图：原图点集的子集+这些点在原图中所连出的边集
+	3. 团：原图的一个子图，且是完全图
+	4. 极大团：此团不是其他团的子集
+	5. 最大团：点数最多的团 -> 团数
+	6. 最小染色：用最少的颜色给点染色使相邻点颜色不同 -> 色数
+	7. 最大独立集：原图点集的子集，任意两点在原图中没有边相连
+	8. 最小团覆盖：用最少个数的团覆盖所有的点
+	   推论 -> 团数<=色数，最大独立集数<=最小团覆盖数
+	9. 弦：连接环中不相邻的两个点的边
+	10.弦图：图中任意长度大于3的环都至少有1个弦
+	   推论 -> 弦图的每一个诱导子图一定是弦图
+	           弦图的任一个诱导子图不同构于Cn(n>3)
+	11.单纯点：记N(v)为点v相邻点的集合，若N(v)+{v}是一个团，则v为单纯点
+	   引理 -> 任何一个弦图都至少有一个单纯点
+	           不是完全图的弦图至少有两个不相邻的单纯
+	// 重点内容 //
+	12.完美消除序列：点的序列v1,v2,..,vn，满足vi在{vi,vi+1,..,vn}中是单纯点
+	   定理 -> 一个无向图是弦图，当且仅当它有一个完美消除序列
+	   构造算法 -> 令cnt[i]为第i个点与多少个已标记的点相邻，初值全为零
+	               每次选择一个cnt[i]最大的结点并打上标记
+	               标记顺序的逆序则为完美消除序列
+	   判定算法 -> 对于每个vi，其出边为vi1,vi2,..,vik
+	               然后判断vi1与vi2,vi3,..,vik是否都相邻
+	               若存在不相邻的情况，则说明不是完美消除序列
+	13.弦图各类算法：
+	   最小染色算法 -> 按照完美消除序列，从后向前，依次染上可以染的最小颜色
+	   最大独立集算法 -> 按照完美消除序列，从前向后，能选则选
+	   最小团覆盖算法 -> 求出最大独立集，记为{p1,p2,..,pk}
+	                     则{N(p1)+{p1},N(p2)+{p2},..,N(pk)+{pk}}即为解
+	16.区间图：坐标轴上的一些区间看作点，任意两个交集非空的区间之间有边
+	   定理 -> 区间图一定是弦图 */
 
 ####	26. **Other**
 
