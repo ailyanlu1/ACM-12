@@ -1,8 +1,8 @@
 >	base
 	
-	
-	01.	*基础图* 
-	02.	*RMQ*  
+	01. *Maxn速查表*
+	02.	*基础图* 
+	03.	*RMQ*  
 	
 >	Connectivity
 	

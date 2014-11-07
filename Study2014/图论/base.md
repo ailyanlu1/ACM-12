@@ -1,6 +1,29 @@
 
+####	01. **Maxn速查表**
 
-####	01. **基础图**
+>	2^i
+
+	11   2048
+	12   4096
+	13   8192
+	14   16384
+	15   32768
+	16   65536
+	17   131072
+	18   262144
+	19   524288
+	20   1048576
+	21   2097152
+	22   4194304
+	23   8388608
+	24   16777216
+	25   33554432
+	26   67108864
+	27   134217728
+	28   268435456
+	29   536870912
+
+####	02. **基础图**
 
 >	图struct
 
@@ -213,7 +236,7 @@
 
 
 
-####    02.  **RMQ**  
+####    03.  **RMQ**  
 
 >	RMQ实现模板
 
@@ -232,14 +255,30 @@
 	            }
 	        }
 	    }
-	    int query(int l, int r) {
+	    int query(int l, int r) {	//求[l, r]
 	//        int k = log2(r - l + 1);
 	//        int k = 31 - __builtin_clz(r - l + 1);
 	          int k = kk[r - l + 1];
 	        return min(st[k][l], st[k][r - (1<<k) + 1]);
 	    }
+		int query(int l, int r) {	//对于sa, 求原串l, r为起点的之间的height
+		    if(l == r) return len - r;
+		    int u = rank[l], v = rank[r];
+		    if(u > v) swap(u, v);
+		    int k = kk[v - (u + 1)+ 1];
+		    return min(st[u + 1][k], st[v - (1<<k) + 1][k]);
+		}
 	}rmq1, rmq2;
 
+	//kk初始化0, C++/G++通用
+    memset(kk, -1, sizeof(kk));
+    for(i = 0; (1<<i) < Maxn; i++) kk[1<<i] = i;
+    for(i = 0; i < Maxn; i++) if(kk[i] == -1) kk[i] = kk[i - 1];
 
+	//kk初始化1, G++
+    for(i = 0; i < Maxn; i++) kk[i] = 31 - __builtin_clz(i);
+
+	//kk初始化2, G++
+    for(i = 0; i < Maxn; i++) kk[i] = log2(i);
 
 
