@@ -293,14 +293,14 @@
 		int len;
 		int num[Maxn];  //待处理的串
 		int sa[Maxn], rank[Maxn], height[Maxn];    //sa[1~n]value(0~n-1); rank[0..n-1]value(1..n); height[2..n]
-		int wa[Maxn], wb[Maxn], wv[Maxn], wd[Maxn];
+		int wv[Maxn], wd[Maxn];
 		
 		int cmp(int *r, int a, int b, int x) {
 			return r[a] == r[b] && r[a + x] == r[b + x];
 		}
 		
 		void da(int *r, int n, int m) {       //  倍增算法 r为待匹配数组  n为总长度+1 m为字符范围
-			int i, j, k, p, *x = wa, *y = wb, *t;
+			int i, j, k, p, *x = rank, *y = height, *t;
 			for(i = 0; i < m; i++) wd[i] = 0;
 			for(i = 0; i < n; i++) wd[x[i] = r[i]]++;
 			for(i = 1; i < m; i++) wd[i] += wd[i - 1];
