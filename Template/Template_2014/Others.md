@@ -109,6 +109,87 @@
 
 ####    05. **弦图完美消除序列**  
 
+>	弦图判定
+
+	//ZOJ 1015 fishing net
+	//简单的弦图判定
+	int adj[Maxn][Maxn];
+	int n, m;
+	int L[Maxn], cnt[Maxn], visit[Maxn], mpL[Maxn];
+	priority_queue<PII> que;
+	
+	//利用MSC最大势算法求完美消除序列L
+	int getList() {
+	    int i, j, k, u, v, w;
+	    for(i = 1; i <= n; i++) cnt[i] = 0, visit[i] = 0;
+	    while(!que.empty()) que.pop();
+	    que.push(MP(0, 1));
+	    k = n;
+	    while(!que.empty()) {
+	        u = que.top().BB; w = que.top().AA;
+	        que.pop();
+	        if(w != cnt[u]) continue;
+	        visit[u] = 1;
+	        mpL[u] = k;
+	        L[k--] = u;
+	        for(v = 1; v <= n; v++) {
+	            if(!visit[v] && adj[u][v]) {
+	                cnt[v]++;
+	                que.push(MP(cnt[v], v));
+	            }
+	        }
+	    }
+	    if(k < 1) return true;
+	    else return false;
+	}
+	
+	//利用完美消除序列判断是否弦图
+	int check() {
+	    int i, j, k, u, v, w;
+	    for(i = n - 1; i >= 1; i--) {
+	        u = L[i];
+	        k = -1;
+	        for(j = i + 1; j <= n; j++) {
+	            v = L[j];
+	            if(adj[u][v]) {
+	                k = v;
+	                break;
+	            }
+	        }
+	        if(k != -1) {
+	            for( j++; j <= n; j++) {
+	                v = L[j];
+	                if(adj[u][v] && !adj[k][v]) return false;
+	            }
+	        }
+	    }
+	    return true;
+	}
+	int main() {
+	    int i, j, u, v, w;
+	    while(scanf("%d%d", &n, &m) != EOF) {
+	        if(!n && !m) break;
+	        for(i = 1; i <= n; i++) {
+	            for(j = 1; j <= n; j++) {
+	                adj[i][j] = 0;
+	            }
+	        }
+	        for(i = 0; i < m; i++) {
+	            scanf("%d%d", &u, &v);
+	            adj[u][v] = adj[v][u] = 1;
+	        }
+	        
+	        if(getList() && check()) {
+	            printf("Perfect\n");
+	        }
+	        else {
+	            printf("Imperfect\n");
+	        }
+	        printf("\n");
+	    }
+	    return 0;
+	}
+
 >	// 弦图与区间图 By 猛犸也钻地 @ 2012.09.13
 
 	/* 相关定义 //

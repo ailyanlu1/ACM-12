@@ -2,6 +2,35 @@
 
 ####    01. **匹配问题**  
 
+>	基本概念
+
+	1. 最大匹配
+	    1. dfs
+	    2. bfs
+	    3. Hopcroft-Karp
+	    4. 利用贪心构造最初解再利用匈牙利增广路调整
+	    5. 最大流
+	         
+	2. 最优完备匹配
+	    1. KM( O(n^4)
+	    2. KM + (O(n^3))  PS: 好像没有这么低的复杂度
+	    3. 费用流
+	          
+	3. 稳定婚姻问题
+	         
+	4. 多重匹配
+	    建立最大流模型解决
+	         
+	5.多重最优匹配
+	   建立费用流模型解决
+	         
+	6. 最大独立集 = 顶点数 - 最大匹配数(如果图Ｇ满足二分图条件,用二分图匹配来做, 否则算法复杂度很高...)
+	         
+	7. 最小点覆盖 = 最大匹配数
+	         
+	8. 最小路径覆盖 = 顶点数 - 最大匹配数(最少不相交简单路径覆盖有向无环图Ｇ)
+	    (PS: 此处注意, 最小路径覆盖是针对有向图而言, 那么将一个点拆开成为i和i'建立二分图, )
+
 >	匈牙利 + 贪心优化
 
 	// O(n*m)
@@ -507,6 +536,8 @@
 
 	验题: 3680  
 
+	const LL MOD = 0x3f3f3f3fLL;
+	const LL INF = (1LL<<55);
 	struct node {
 	    int u, v, next;
 	    LL c, w;
@@ -524,7 +555,7 @@
 	bool spfa(int s, int t, int n) {
 	    int i;
 	    for(i = 0; i <= n; i++) {
-	        dist[i] = MOD;
+	        dist[i] = INF;
 	        visit[i] = 0;
 	        pre[i] = -1;
 	    }
@@ -548,7 +579,7 @@
 	            }
 	        }
 	    }
-	    if(dist[t] == MOD) return false;
+	    if(dist[t] == INF) return false;
 	    else return true;
 	}
 	LL ChangeFlow(int t) {

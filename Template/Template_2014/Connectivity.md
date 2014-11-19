@@ -491,12 +491,13 @@
 >	倍增算法
 
 	//改bfs
-	验题: POJ1330,     
-
+	//验题: POJ1330,     
+	
 	//LCA O(nlogn)
 	//加边之前使用initLCA()初始化数组
 	//调用solveLCA()初始化LCA
 	//调用getLCA(x,y)返回x和y的LCA
+	#define STEP 17
 	struct node {
 	    int u, v, l, next;
 	}e[Maxm];
@@ -505,14 +506,14 @@
 	    e[tot].u = u; e[tot].v = v;
 	    e[tot].next = last[u]; last[u] = tot++;
 	}
-	int depth[Maxn], fa[16][Maxn];
+	int depth[Maxn], fa[STEP][Maxn];
 	int n, m;
 	void initLCA() {
 	    int i, j;
 	    for(i = 0; i <= n; i++) {
 	        depth[i] = -1;
 	        last[i] = -1;
-	        for(j = 0; j < 16; j++) fa[j][i] = -1;
+	        for(j = 0; j < STEP; j++) fa[j][i] = -1;
 	    }
 	    tot = 0;
 	}
@@ -531,13 +532,13 @@
 	int getLCA (int x, int y) {
 	    int i, dif = abs(depth[x] - depth[y]);
 	    if (depth[x] < depth[y]) swap(x, y);
-	    for (i = 20 - 1; i >= 0; i--) {
+	    for (i = STEP - 1; i >= 0; i--) {
 	        if ((1 << i) & dif) {
 	            dif -= (1 << i);
 	            x = fa[i][x];
 	        }
 	    }
-	    for (i = 16 - 1; i >= 0; i--) {
+	    for (i = STEP - 1; i >= 0; i--) {
 	        if (fa[i][x] != fa[i][y]) {
 	            x = fa[i][x];
 	            y = fa[i][y];
@@ -549,11 +550,11 @@
 	
 	void solveLCA() {
 	    int i, j, root = 1;
-		for(i = 0; i <= n; i++) depth[i] = -1;
+	    for(i = 0; i <= n; i++) depth[i] = -1;
 	    fa[0][root] = root;
 	    depth[root] = 0;
 	    dfsLCA(root);
-	    for (i = 1; i < 16; i++)
+	    for (i = 1; i < STEP; i++)
 	        for(j = 0; j <= n; j++)
 	            fa[i][j] = fa[i-1][fa[i-1][j]];
 	}
