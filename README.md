@@ -1,5 +1,5 @@
 ACM
 ===
 
-Coding every day!
+Try my best!
 
