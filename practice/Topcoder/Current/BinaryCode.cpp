@@ -1,0 +1,251 @@
+// BEGIN CUT HERE
+/*
+
+*/
+// END CUT HERE
+#include <cctype>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <ctime>
+#include <map>
+#include <set>
+#include <list>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <bitset>
+#include <string>
+#include <vector>
+#include <fstream>
+#include <iomanip>
+#include <numeric>
+#include <sstream>
+#include <utility>
+#include <iostream>
+#include <algorithm>
+#include <stdexcept>
+#include <functional>
+using namespace std;
+ 
+#define PB push_back
+#define PPB pop_back
+#define PF push_front
+#define PPF pop_front
+#define MP make_pair
+#define AA first
+#define BB second
+#define BG begin()
+#define ED end()
+#define SZ size()
+#define SQ(x) ((x)*(x))
+#define SORT(p) sort(p.BGN,p.ED)
+#define MEM(a, b) memset(a, (b), sizeof(a))
+typedef pair<int, int> PII;
+typedef vector<int> VI;
+typedef queue<int> QI;
+typedef deque<int> DQI;
+typedef set<int> SI;
+typedef vector<PII> VII;
+typedef queue<PII> QII;
+typedef deque<PII> DQII;
+typedef set<PII> SII;
+
+typedef long long LL;
+typedef pair<LL, LL> PLL;
+typedef vector<LL> VL;
+typedef queue<LL> QL;
+typedef deque<LL> DQL;
+typedef set<LL> SL;
+typedef vector<PLL> VLL;
+typedef queue<PLL> QLL;
+typedef deque<PLL> DQLL;
+typedef set<PLL> SLL;
+#define Maxn 111111
+#define Maxm 111111
+class BinaryCode
+{
+public:
+    int n, m;
+    vector <string> decode (string message)
+    {
+        vector <string> ret;
+        int i, j, u, v, w;
+        
+        return vector <string>(ret);
+    }
+};
+ 
+// BEGIN CUT HERE
+#include <cstdio>
+#include <ctime>
+#include <iostream>
+#include <string>
+#include <vector>
+namespace moj_harness {
+	using std::string;
+	using std::vector;
+	int run_test_case(int);
+	void run_test(int casenum = -1, bool quiet = false) {
+		if (casenum != -1) {
+			if (run_test_case(casenum) == -1 && !quiet) {
+				std::cerr << "Illegal input! Test case " << casenum << " does not exist." << std::endl;
+			}
+			return;
+		}
+		
+		int correct = 0, total = 0;
+		for (int i=0;; ++i) {
+			int x = run_test_case(i);
+			if (x == -1) {
+				if (i >= 100) break;
+				continue;
+			}
+			correct += x;
+			++total;
+		}
+		
+		if (total == 0) {
+			std::cerr << "No test cases run." << std::endl;
+		} else if (correct < total) {
+			std::cerr << "Some cases FAILED (passed " << correct << " of " << total << ")." << std::endl;
+		} else {
+			std::cerr << "All " << total << " tests passed!" << std::endl;
+		}
+	}
+	
+	template<typename T> std::ostream& operator<<(std::ostream &os, const vector<T> &v) { os << "{"; for (typename vector<T>::const_iterator vi=v.begin(); vi!=v.end(); ++vi) { if (vi != v.begin()) os << ","; os << " " << *vi; } os << " }"; return os; }
+	template<> std::ostream& operator<<(std::ostream &os, const vector<string> &v) { os << "{"; for (vector<string>::const_iterator vi=v.begin(); vi!=v.end(); ++vi) { if (vi != v.begin()) os << ","; os << " \"" << *vi << "\""; } os << " }"; return os; }
+
+	int verify_case(int casenum, const vector <string> &expected, const vector <string> &received, std::clock_t elapsed) { 
+		std::cerr << "Example " << casenum << "... "; 
+		
+		string verdict;
+		vector<string> info;
+		char buf[100];
+		
+		if (elapsed > CLOCKS_PER_SEC / 200) {
+			std::sprintf(buf, "time %.2fs", elapsed * (1.0/CLOCKS_PER_SEC));
+			info.push_back(buf);
+		}
+		
+		if (expected == received) {
+			verdict = "PASSED";
+		} else {
+			verdict = "FAILED";
+		}
+		
+		std::cerr << verdict;
+		if (!info.empty()) {
+			std::cerr << " (";
+			for (size_t i=0; i<info.size(); ++i) {
+				if (i > 0) std::cerr << ", ";
+				std::cerr << info[i];
+			}
+			std::cerr << ")";
+		}
+		std::cerr << std::endl;
+		
+		if (verdict == "FAILED") {
+			std::cerr << "    Expected: " << expected << std::endl; 
+			std::cerr << "    Received: " << received << std::endl; 
+		}
+		
+		return verdict == "PASSED";
+	}
+
+	int run_test_case(int casenum__) {
+		switch (casenum__) {
+		case 0: {
+			string message            = "123210122";
+			string expected__[]       = { "011100011",  "NONE" };
+
+			std::clock_t start__      = std::clock();
+			vector <string> received__ = BinaryCode().decode(message);
+			return verify_case(casenum__, vector <string>(expected__, expected__ + (sizeof expected__ / sizeof expected__[0])), received__, clock()-start__);
+		}
+		case 1: {
+			string message            = "11";
+			string expected__[]       = { "01",  "10" };
+
+			std::clock_t start__      = std::clock();
+			vector <string> received__ = BinaryCode().decode(message);
+			return verify_case(casenum__, vector <string>(expected__, expected__ + (sizeof expected__ / sizeof expected__[0])), received__, clock()-start__);
+		}
+		case 2: {
+			string message            = "22111";
+			string expected__[]       = { "NONE",  "11001" };
+
+			std::clock_t start__      = std::clock();
+			vector <string> received__ = BinaryCode().decode(message);
+			return verify_case(casenum__, vector <string>(expected__, expected__ + (sizeof expected__ / sizeof expected__[0])), received__, clock()-start__);
+		}
+		case 3: {
+			string message            = "123210120";
+			string expected__[]       = { "NONE",  "NONE" };
+
+			std::clock_t start__      = std::clock();
+			vector <string> received__ = BinaryCode().decode(message);
+			return verify_case(casenum__, vector <string>(expected__, expected__ + (sizeof expected__ / sizeof expected__[0])), received__, clock()-start__);
+		}
+		case 4: {
+			string message            = "3";
+			string expected__[]       = { "NONE",  "NONE" };
+
+			std::clock_t start__      = std::clock();
+			vector <string> received__ = BinaryCode().decode(message);
+			return verify_case(casenum__, vector <string>(expected__, expected__ + (sizeof expected__ / sizeof expected__[0])), received__, clock()-start__);
+		}
+		case 5: {
+			string message            = "12221112222221112221111111112221111";
+			string expected__[]       = { "01101001101101001101001001001101001",  "10110010110110010110010010010110010" };
+
+			std::clock_t start__      = std::clock();
+			vector <string> received__ = BinaryCode().decode(message);
+			return verify_case(casenum__, vector <string>(expected__, expected__ + (sizeof expected__ / sizeof expected__[0])), received__, clock()-start__);
+		}
+
+		// custom cases
+
+/*      case 6: {
+			string message            = ;
+			string expected__[]       = ;
+
+			std::clock_t start__      = std::clock();
+			vector <string> received__ = BinaryCode().decode(message);
+			return verify_case(casenum__, vector <string>(expected__, expected__ + (sizeof expected__ / sizeof expected__[0])), received__, clock()-start__);
+		}*/
+/*      case 7: {
+			string message            = ;
+			string expected__[]       = ;
+
+			std::clock_t start__      = std::clock();
+			vector <string> received__ = BinaryCode().decode(message);
+			return verify_case(casenum__, vector <string>(expected__, expected__ + (sizeof expected__ / sizeof expected__[0])), received__, clock()-start__);
+		}*/
+/*      case 8: {
+			string message            = ;
+			string expected__[]       = ;
+
+			std::clock_t start__      = std::clock();
+			vector <string> received__ = BinaryCode().decode(message);
+			return verify_case(casenum__, vector <string>(expected__, expected__ + (sizeof expected__ / sizeof expected__[0])), received__, clock()-start__);
+		}*/
+		default:
+			return -1;
+		}
+	}
+}
+
+ 
+#include <cstdlib>
+int main(int argc, char *argv[]) {
+	if (argc == 1) {
+		moj_harness::run_test();
+	} else {
+		for (int i=1; i<argc; ++i)
+			moj_harness::run_test(std::atoi(argv[i]));
+	}
+}
+// END CUT HERE
