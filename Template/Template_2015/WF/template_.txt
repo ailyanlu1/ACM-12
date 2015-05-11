@@ -37,23 +37,21 @@ g[u,v]表示F[u,v]-B[u,v] 显然 0<=g[u,v]<=C[u,v]-B[u,v]
 
 needed:
 	匈牙利
-	dinic
+	dinic(部分代码)
 	朴素最小费用最大流
 	tarjan(有向图,边双,点双)
 	生成树相关(斯坦纳,度限制,最优比例,计数)
 	次短路(K短路)
-	混合欧拉回路判定
-	RMQ(getmin)
+	混合欧拉回路判定(tips)
+	RMQ(getmin tips)
 	有向图拓扑排序计数(树)
-	LCA
+	LCA(倍增,tarjan(关键代码))
 	2-SAT(原理,可行性,任一解,字典序最小解)
-	稳定婚姻
-	树的Hash判定同构
+	稳定婚姻(tips)
+	树的Hash判定同构(tips)
 
 	KMP
-	AC自动机
-
-	重复覆盖
+	AC自动机(关键代码)
 
 	.vimrc				(_1)
 	head
