@@ -9,3 +9,5 @@
 做题:
 
 	SPOJ 375 Query on a tree
+	HDU 3966 	Aragorn's Story
+	POJ 2763 	Housewife Wind 
