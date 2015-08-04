@@ -72,9 +72,9 @@
 		int que[Maxn], head, tail;
 		PII sta[Maxn];
 		int cur[Maxn];
-		int llv[Maxn];
+		int llv[Maxn];	//将v点或其指向父结点的边的权值映射记录用于求lv[]
 		
-		void bfsinit(int root = 1) { // siz[], dep[], son[], parent[], llv[], emp[]
+		void bfsinit(int root = 1) {//siz[], dep[], son[], parent[], llv[], emp[]
 		    int i, j, k, u, v, w;
 		    int dmax;
 		    head = tail = 0;
@@ -133,6 +133,23 @@
 		        }
 		    }
 		}
+
+	    void split(int u, int t) {//dfs mp[], top[], lv[]
+	        int j, v;
+	        top[u] = t;
+	        mp[u] = ++ncnt;
+	        lv[ncnt] = llv[u];
+	
+	        if(son[u] != -1) split(son[u], t);
+	        for(j = last[u]; j != -1; j = e[j].next) {
+	            v = e[j].v;
+	            if(v == fa[u]) continue;
+	            if(v != son[u]) {
+	                split(v, v);
+	            }
+	        }
+	    }
+
 		
 		void debug() {
 		    for(int i = 1; i <= n; ++i) {
