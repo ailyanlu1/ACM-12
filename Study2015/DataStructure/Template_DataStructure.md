@@ -246,9 +246,63 @@
 		}
 
 
+*	平衡二叉树(Treap)
+
+
+
+*	平衡二叉树(Splay)
+
+
+
+*	树分治(点分治)
+
+
+
+*	树分治(边分治)
+
+
+
 *	
 
 
+*	STL优先队列（堆）的运算符重载（推荐）
+
+
+		struct cmp {
+		     bool operator() (const int &a, const int &b){
+		        return a>b;
+		     }
+		};
+		priority_queue<int, vector<int>, cmp> Q;
+
+*	RMQ(update ***initkk()*** function)
+
+		int kk[Maxn];
+		void initkk() {
+		    int i;
+		    for(i = 0; i < Maxn; ++i) kk[i] = log2(i);
+		}
+		struct RMQ {
+		    int n;
+		    int st[20][Maxn];
+		    void init(int v[], int L) {
+		        int i, j, k; n = L;
+		        for(i = 0; i <= n; i++) st[0][i] = v[i];
+		        for(j = 1, k = 0; (1<<j) <= n; j++, k++) {
+		            for(i = 0; i + (1<<j) - 1<= n; i++) {
+		                st[j][i] = min(st[j - 1][i], st[j - 1][i + (1<<k)]);
+		            }
+		        }
+		    }
+		    int query(int l, int r) {
+		//        int k = 31 - __builtin_clz(r - l + 1);
+		        int k = kk[r - l + 1];
+		        return min(st[k][l], st[k][r - (1<<k) + 1]);
+		    }
+		}rmq1, rmq2;
+
+
+*	
 
 ####    10. **Other**  
 
